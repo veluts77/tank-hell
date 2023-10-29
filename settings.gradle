@@ -10,3 +10,5 @@ plugins {
 }
 
 rootProject.name = 'tank-hell'
+
+include 'main', 'ui'

@@ -1,0 +1,26 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version "$kotlin_version"
+    id 'application'
+    id 'com.github.johnrengelman.shadow'
+}
+
+repositories {
+    mavenCentral()
+}
+
+//test {
+//    useJUnitPlatform()
+//}
+
+kotlin {
+    jvmToolchain(8)
+}
+
+application {
+    mainClass = 'MainKt'
+}
+
+dependencies {
+    implementation project(":ui")
+//    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}

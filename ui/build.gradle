@@ -1,0 +1,11 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version "$kotlin_version"
+}
+
+repositories {
+    mavenCentral()
+}
+
+kotlin {
+    jvmToolchain(8)
+}
