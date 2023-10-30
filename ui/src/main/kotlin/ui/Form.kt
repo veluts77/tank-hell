@@ -35,9 +35,9 @@ class Form : JFrame(), Runnable {
         pack()
 
         canvas.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
+            override fun mousePressed(e: MouseEvent?) {
                 if (e != null)
-                    blockWidgets.add(FallingDustBlockWidget())
+                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y))
             }
         })
     }

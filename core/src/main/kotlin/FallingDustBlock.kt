@@ -1,3 +1,5 @@
+import kotlin.math.sqrt
+
 class FallingDustBlock {
     private var fallActionsCounter = 0
 
@@ -8,19 +10,41 @@ class FallingDustBlock {
     }
 
     init {
-        diagonal()
+        buildCircularArea()
     }
 
-    private fun diagonal() {
-        for (x in 0..199) {
-            for (y in 0..199) {
-                if (x > y) matrix[x][y] = true
+    private fun buildCircularArea() {
+        buildOneSector()
+        mirrorVertically()
+        mirrorHorizontally()
+    }
+
+    private fun buildOneSector() {
+        for (x in 0..99) {
+            for (y in 0..99) {
+                if (y > sqrt(10000.0 - x * x)) matrix[x + 100][y + 100] = true
+            }
+        }
+    }
+
+    private fun mirrorVertically() {
+        for (x in 0..99) {
+            for (y in 100..199) {
+                matrix[x][y] = matrix[199 - x][y]
+            }
+        }
+    }
+
+    private fun mirrorHorizontally() {
+        for (y in 0..99) {
+            for (x in 0..199) {
+                matrix[x][y] = matrix[x][199 - y]
             }
         }
     }
 
     fun tick() {
-        for (i in 0..4) {
+        for (i in 0..10) {
             fall()
         }
     }
