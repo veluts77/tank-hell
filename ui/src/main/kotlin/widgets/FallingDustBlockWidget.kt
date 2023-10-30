@@ -1,14 +1,14 @@
 package widgets
 
-import FallingDustBlock
+import domain.FallingDustBlock
 import java.awt.Color
 import java.awt.Graphics2D
 
 class FallingDustBlockWidget(
-    var xPos: Int,
-    var yPos: Int
+    private var xPos: Int,
+    private var yPos: Int
 ) {
-    val fallingDustBlock = FallingDustBlock()
+    private val fallingDustBlock = FallingDustBlock()
 
     fun tick() = fallingDustBlock.tick()
 

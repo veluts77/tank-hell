@@ -1,3 +1,5 @@
+package domain
+
 import kotlin.math.sqrt
 
 class FallingDustBlock {

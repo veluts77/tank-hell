@@ -1,5 +1,6 @@
 package ui
 
+import widgets.DustAreaWidget
 import widgets.FallingDustBlockWidget
 import java.awt.Color
 import java.awt.Dimension
@@ -13,10 +14,10 @@ import java.awt.image.BufferedImage
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
+import kotlin.math.max
 
 class Form : JFrame(), Runnable {
 
-    private val backgroundColor = Color(20, 55, 75, 255)
     private val w = 800
     private val h = 600
 
@@ -24,6 +25,7 @@ class Form : JFrame(), Runnable {
         w, h, BufferedImage.TYPE_INT_RGB)
 
     private var blockWidgets = mutableListOf<FallingDustBlockWidget>()
+    private val dustAreaWidget = DustAreaWidget()
 
     init {
         isVisible = true
@@ -58,7 +60,7 @@ class Form : JFrame(), Runnable {
         showTime(g, elapsedTime)
 
         try {
-            Thread.sleep(Math.max(25 - elapsedTime, 1))
+            Thread.sleep(max(25 - elapsedTime, 1))
         } catch (e: InterruptedException) {
             e.printStackTrace()
         }
@@ -68,7 +70,7 @@ class Form : JFrame(), Runnable {
         val beginTime = System.currentTimeMillis()
 
         val g2 = prepareSceneAndGetGraphics(image)
-        drawPlaceholder(g2)
+        dustAreaWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
 
         val endTime = System.currentTimeMillis()
@@ -77,21 +79,10 @@ class Form : JFrame(), Runnable {
 
     private fun prepareSceneAndGetGraphics(img: BufferedImage): Graphics2D {
         val g2 = img.createGraphics()
-        g2.color = backgroundColor
-        g2.fillRect(0, 0, w, h)
+//        g2.color = backgroundColor
+//        g2.fillRect(0, 0, w, h)
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
         return g2
-    }
-
-    private fun drawPlaceholder(g2: Graphics2D) {
-        g2.color = Color.yellow
-        val NODE_RADIUS = 10
-        g2.fillOval(
-            500 - NODE_RADIUS,
-            100 - NODE_RADIUS,
-            NODE_RADIUS * 2,
-            NODE_RADIUS * 2
-        )
     }
 
     private fun processLogic() {
