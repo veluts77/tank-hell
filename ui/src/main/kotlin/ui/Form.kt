@@ -1,5 +1,6 @@
 package ui
 
+import widgets.FallingDustBlockWidget
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -22,6 +23,7 @@ class Form : JFrame(), Runnable {
     private val imgBuffer = BufferedImage(
         w, h, BufferedImage.TYPE_INT_RGB)
 
+    private var blockWidgets = mutableListOf<FallingDustBlockWidget>()
 
     init {
         isVisible = true
@@ -35,21 +37,14 @@ class Form : JFrame(), Runnable {
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 if (e != null)
-                    print(".")
+                    blockWidgets.add(FallingDustBlockWidget())
             }
         })
     }
 
 
     override fun run() {
-        while (true) {
-            repaint()
-            try {
-                Thread.sleep(15)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }
+        while (true) repaint()
     }
 
     override fun paint(g: Graphics?) {
@@ -59,8 +54,14 @@ class Form : JFrame(), Runnable {
         processLogic()
         (g as Graphics2D).drawImage(imgBuffer, null, 8, 30)
 
-        val endTime = System.currentTimeMillis()
-        showTime(g, endTime - beginTime)
+        val elapsedTime = System.currentTimeMillis() - beginTime
+        showTime(g, elapsedTime)
+
+        try {
+            Thread.sleep(Math.max(25 - elapsedTime, 1))
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
     }
 
     private fun drawScene(image: BufferedImage) {
@@ -68,6 +69,7 @@ class Form : JFrame(), Runnable {
 
         val g2 = prepareSceneAndGetGraphics(image)
         drawPlaceholder(g2)
+        blockWidgets.forEach { it.draw(g2) }
 
         val endTime = System.currentTimeMillis()
         showInnerTime(g2, endTime - beginTime)
@@ -85,8 +87,8 @@ class Form : JFrame(), Runnable {
         g2.color = Color.yellow
         val NODE_RADIUS = 10
         g2.fillOval(
-            300 - NODE_RADIUS,
-            300 - NODE_RADIUS,
+            500 - NODE_RADIUS,
+            100 - NODE_RADIUS,
             NODE_RADIUS * 2,
             NODE_RADIUS * 2
         )
@@ -94,6 +96,12 @@ class Form : JFrame(), Runnable {
 
     private fun processLogic() {
 //        for (i in 0 until SKIP_FRAMES) scene.logic()
+        val toRemove = HashSet<FallingDustBlockWidget>()
+        blockWidgets.forEach {
+            it.tick()
+            if (it.completed()) toRemove.add(it)
+        }
+        blockWidgets.removeAll(toRemove)
     }
 
     private fun showTime(g: Graphics, time: Long) {
