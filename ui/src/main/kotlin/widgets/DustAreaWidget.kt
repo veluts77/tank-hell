@@ -12,10 +12,11 @@ class DustAreaWidget {
         g2.color = backgroundColor
         g2.fillRect(0, 0, 800, 600)
         g2.color = Color.blue
-        for (y in 0..599) {
-            for (x in 0..799) {
+        for (x in 0..799) {
+            for (y in 0..599) {
                 if (dustArea.at(x, y)) {
-                    g2.drawLine(x, y, x, y)
+                    g2.drawLine(x, y, x, 599)
+                    break
                 }
             }
         }

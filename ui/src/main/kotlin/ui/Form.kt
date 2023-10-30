@@ -6,8 +6,6 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Graphics2D
-import java.awt.RenderingHints.KEY_ANTIALIASING
-import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
@@ -69,7 +67,7 @@ class Form : JFrame(), Runnable {
     private fun drawScene(image: BufferedImage) {
         val beginTime = System.currentTimeMillis()
 
-        val g2 = prepareSceneAndGetGraphics(image)
+        val g2 = image.createGraphics()
         dustAreaWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
 
@@ -77,16 +75,7 @@ class Form : JFrame(), Runnable {
         showInnerTime(g2, endTime - beginTime)
     }
 
-    private fun prepareSceneAndGetGraphics(img: BufferedImage): Graphics2D {
-        val g2 = img.createGraphics()
-//        g2.color = backgroundColor
-//        g2.fillRect(0, 0, w, h)
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-        return g2
-    }
-
     private fun processLogic() {
-//        for (i in 0 until SKIP_FRAMES) scene.logic()
         val toRemove = HashSet<FallingDustBlockWidget>()
         blockWidgets.forEach {
             it.tick()
