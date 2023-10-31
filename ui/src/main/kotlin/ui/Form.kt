@@ -26,18 +26,18 @@ class Form : JFrame(), Runnable {
     private val dustAreaWidget = DustAreaWidget()
 
     init {
-        isVisible = true
         defaultCloseOperation = EXIT_ON_CLOSE
         setLocation(50, 50)
         val canvas = JLabel(ImageIcon(imgBuffer))
         canvas.preferredSize = Dimension(w, h)
         add(canvas)
         pack()
+        isVisible = true
 
         canvas.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 if (e != null)
-                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y))
+                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y, 100, 100))
             }
         })
     }
