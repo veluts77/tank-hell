@@ -20,10 +20,21 @@ class ExplosionWidget(
         val currentRadius = explosion.currentRadius()
         if (currentRadius <= 0) return
 
+        val a = currentArea()
+        g2.color = Color.red
+        g2.fillOval(a.x, a.y, a.width, a.height)
+    }
+
+    fun createFallingBlockWidget(): FallingDustBlockWidget {
+        val a = currentArea()
+        return FallingDustBlockWidget(a.x, a.y, a.width, a.height)
+    }
+
+    private fun currentArea(): domain.Area {
+        val currentRadius = explosion.currentRadius()
         val x = centerX - currentRadius
         val y = centerY - currentRadius
         val diameter = currentRadius * 2
-        g2.color = Color.red
-        g2.fillOval(x, y, diameter, diameter)
+        return domain.Area(x, y, diameter, diameter)
     }
 }

@@ -84,7 +84,10 @@ class Panel: JPanel() {
         val toRemove = HashSet<ExplosionWidget>()
         explosionWidgets.forEach {
             it.tick()
-            if (it.completed()) toRemove.add(it)
+            if (it.completed()) {
+                toRemove.add(it)
+                blockWidgets.add(it.createFallingBlockWidget())
+            }
         }
         explosionWidgets.removeAll(toRemove)
     }
