@@ -21,7 +21,7 @@ class Panel: JPanel() {
         w, h, BufferedImage.TYPE_INT_RGB)
 
     private val blockWidgets = mutableListOf<FallingDustBlockWidget>()
-    private val dustAreaWidget = DustAreaWidget()
+    private val dustAreaWidget = DustAreaWidget(w, h)
 
     init {
         preferredSize = Dimension(w, h)

@@ -2,10 +2,13 @@ package domain
 
 import kotlin.math.sin
 
-class DustArea {
+class DustArea(
+    private val width: Int,
+    private val height: Int
+) {
 
-    private val matrix: Array<BooleanArray> = Array(800) {
-        BooleanArray(600) {
+    private val matrix: Array<BooleanArray> = Array(width) {
+        BooleanArray(height) {
             false
         }
     }
@@ -15,8 +18,8 @@ class DustArea {
     }
 
     private fun buildSineArea() {
-        for (x in 0..799) {
-            for (y in 0..599) {
+        for (x in 0..<width) {
+            for (y in 0..<height) {
                 if (y > 200 * sin(0.01 * x) + 300) matrix[x][y] = true
             }
         }
