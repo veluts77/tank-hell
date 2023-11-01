@@ -1,6 +1,7 @@
 package ui
 
 import widgets.DustAreaWidget
+import widgets.ExplosionWidget
 import widgets.FallingDustBlockWidget
 import java.awt.Color
 import java.awt.Dimension
@@ -21,6 +22,7 @@ class Panel: JPanel() {
         w, h, BufferedImage.TYPE_INT_RGB)
 
     private val blockWidgets = mutableListOf<FallingDustBlockWidget>()
+    private val explosionWidgets = mutableListOf<ExplosionWidget>()
     private val dustAreaWidget = DustAreaWidget(w, h)
 
     init {
@@ -29,7 +31,8 @@ class Panel: JPanel() {
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 if (e != null)
-                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y, 400, 400))
+//                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y, 400, 400))
+                    explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
             }
         })
     }
@@ -57,18 +60,33 @@ class Panel: JPanel() {
         val g2 = image.createGraphics()
         dustAreaWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
+        explosionWidgets.forEach { it.draw(g2) }
 
         val endTime = System.currentTimeMillis()
         showInnerTime(g2, endTime - beginTime)
     }
 
     private fun processLogic() {
+        processFallingBlocks()
+        processExplosions()
+    }
+
+    private fun processFallingBlocks() {
         val toRemove = HashSet<FallingDustBlockWidget>()
         blockWidgets.forEach {
             it.tick()
             if (it.completed()) toRemove.add(it)
         }
         blockWidgets.removeAll(toRemove)
+    }
+
+    private fun processExplosions() {
+        val toRemove = HashSet<ExplosionWidget>()
+        explosionWidgets.forEach {
+            it.tick()
+            if (it.completed()) toRemove.add(it)
+        }
+        explosionWidgets.removeAll(toRemove)
     }
 
     private fun showTime(g: Graphics, time: Long) {
