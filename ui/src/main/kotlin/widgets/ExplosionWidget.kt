@@ -1,6 +1,6 @@
 package widgets
 
-import domain.DustArea
+import domain.GameField
 import domain.Explosion
 import java.awt.Color
 import java.awt.Graphics2D
@@ -25,8 +25,8 @@ class ExplosionWidget(
         g2.fillOval(a.x, a.y, a.width, a.height)
     }
 
-    fun createFallingBlockWidgetOn(dustArea: DustArea): FallingDustBlockWidget {
-        val fallingBlockMatrix = dustArea.subMatrixFor(explosion)
+    fun createFallingBlockWidgetOn(gameField: GameField): FallingDustBlockWidget {
+        val fallingBlockMatrix = gameField.subMatrixFor(explosion)
         val a = explosion.currentExplosionArea()
         return FallingDustBlockWidget(a.x, a.y - (fallingBlockMatrix[0].size - a.height), fallingBlockMatrix)
     }

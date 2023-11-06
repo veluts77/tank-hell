@@ -2,7 +2,7 @@ package domain
 
 import kotlin.math.sin
 
-class DustArea(
+class GameField(
     private val width: Int,
     private val height: Int
 ) {
@@ -14,10 +14,10 @@ class DustArea(
     }
 
     init {
-        buildSineArea()
+        buildSineField()
     }
 
-    private fun buildSineArea() {
+    private fun buildSineField() {
         for (x in 0..<width) {
             for (y in 0..<height) {
                 if (y > 200 * sin(0.01 * x) + 300) matrix[x][y] = true

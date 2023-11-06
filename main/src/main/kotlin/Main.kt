@@ -1,7 +1,7 @@
-import ui.Form
+import ui.Frame
 
 fun main() {
-    val f = Form()
+    val f = Frame()
     f.title = "Tank Hell"
     Thread(f).start()
 }

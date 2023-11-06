@@ -1,14 +1,14 @@
 package widgets
 
-import domain.DustArea
+import domain.GameField
 import java.awt.Color
 import java.awt.Graphics2D
 
-class DustAreaWidget(
+class GameFieldWidget(
     private val width: Int,
     private val height: Int
 ) {
-    private val dustArea = DustArea(width, height)
+    private val gameField = GameField(width, height)
     private val backgroundColor = Color(20, 55, 75, 255)
 
     fun draw(g2: Graphics2D) {
@@ -17,7 +17,7 @@ class DustAreaWidget(
         g2.color = Color.blue
         for (x in 0..<width) {
             for (y in 0..<height) {
-                if (dustArea.at(x, y)) {
+                if (gameField.at(x, y)) {
                     g2.drawLine(x, y, x, height - 1)
                     break
                 }
@@ -25,5 +25,5 @@ class DustAreaWidget(
         }
     }
 
-    fun dustArea() = dustArea
+    fun gameField() = gameField
 }

@@ -1,8 +1,8 @@
 package ui
 
-import widgets.DustAreaWidget
 import widgets.ExplosionWidget
 import widgets.FallingDustBlockWidget
+import widgets.GameFieldWidget
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage
 import javax.swing.JPanel
 import kotlin.math.max
 
-class Panel: JPanel() {
+class GamePanel: JPanel() {
 
     private val w = 800
     private val h = 600
@@ -23,7 +23,7 @@ class Panel: JPanel() {
 
     private val blockWidgets = mutableListOf<FallingDustBlockWidget>()
     private val explosionWidgets = mutableListOf<ExplosionWidget>()
-    private val dustAreaWidget = DustAreaWidget(w, h)
+    private val gameFieldWidget = GameFieldWidget(w, h)
 
     init {
         preferredSize = Dimension(w, h)
@@ -57,7 +57,7 @@ class Panel: JPanel() {
         val beginTime = System.currentTimeMillis()
 
         val g2 = image.createGraphics()
-        dustAreaWidget.draw(g2)
+        gameFieldWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
         explosionWidgets.forEach { it.draw(g2) }
 
@@ -85,7 +85,7 @@ class Panel: JPanel() {
             it.tick()
             if (it.completed()) {
                 toRemove.add(it)
-                blockWidgets.add(it.createFallingBlockWidgetOn(dustAreaWidget.dustArea()))
+                blockWidgets.add(it.createFallingBlockWidgetOn(gameFieldWidget.gameField()))
             }
         }
         explosionWidgets.removeAll(toRemove)
