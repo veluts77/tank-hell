@@ -1,56 +1,28 @@
 package domain
 
-import kotlin.math.sqrt
-
 class FallingDustBlock(
-    private val width: Int,
-    private val height: Int
+    private val matrix: Array<BooleanArray>
 ) {
+    private val width = matrix.size
+    private val height = matrix[0].size
     private val halfWidth = width / 2
-    private val halfHeight = height / 2
     private var fallActionsCounter = 0
 
-    private val matrix: Array<BooleanArray> = Array(width) {
-        BooleanArray(height) {
-            false
-        }
-    }
-
     init {
-        buildCircularArea()
+        cutCircularArea()
     }
 
-    private fun buildCircularArea() {
-        buildOneSector()
-        mirrorVertically()
-        mirrorHorizontally()
-    }
-
-    private fun buildOneSector() {
-        val squaredHalfWidth = halfWidth * halfWidth.toDouble()
-        for (x in 0..<halfWidth) {
-            for (y in 0..<halfHeight) {
-                if (y > sqrt(squaredHalfWidth - x * x)) {
-                    matrix[x + halfWidth][y + halfHeight] = true
+    private fun cutCircularArea() {
+        val radius = halfWidth
+        val yCorrection = halfWidth + height - width
+        for (x in 0..<radius)
+            for (y in 0..<radius)
+                if (x * x + y * y < radius * radius) {
+                    matrix[x + halfWidth][y + yCorrection] = false
+                    matrix[-x + halfWidth][y + yCorrection] = false
+                    matrix[x + halfWidth][-y + yCorrection] = false
+                    matrix[-x + halfWidth][-y + yCorrection] = false
                 }
-            }
-        }
-    }
-
-    private fun mirrorVertically() {
-        for (x in 0..<halfWidth) {
-            for (y in halfHeight..<height) {
-                matrix[x][y] = matrix[width - 1 - x][y]
-            }
-        }
-    }
-
-    private fun mirrorHorizontally() {
-        for (y in 0..<halfHeight) {
-            for (x in 0..<width) {
-                matrix[x][y] = matrix[x][height - 1 - y]
-            }
-        }
     }
 
     fun tick() {
@@ -77,5 +49,5 @@ class FallingDustBlock(
         return matrix[x][y]
     }
 
-    fun completed() = fallActionsCounter > height
+    fun completed() = fallActionsCounter > width
 }

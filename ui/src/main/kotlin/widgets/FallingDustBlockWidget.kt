@@ -7,10 +7,11 @@ import java.awt.Graphics2D
 class FallingDustBlockWidget(
     private val xPos: Int,
     private val yPos: Int,
-    private val width: Int,
-    private val height: Int
+    matrix: Array<BooleanArray>
 ) {
-    private val fallingDustBlock = FallingDustBlock(width, height)
+    private val width: Int = matrix.size
+    private val height: Int = matrix[0].size
+    private val fallingDustBlock = FallingDustBlock(matrix)
 
     fun tick() = fallingDustBlock.tick()
 

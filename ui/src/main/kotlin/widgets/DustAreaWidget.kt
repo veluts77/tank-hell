@@ -24,4 +24,6 @@ class DustAreaWidget(
             }
         }
     }
+
+    fun dustArea() = dustArea
 }

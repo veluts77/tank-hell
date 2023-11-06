@@ -31,7 +31,6 @@ class Panel: JPanel() {
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 if (e != null)
-//                    blockWidgets.add(FallingDustBlockWidget(e.x, e.y, 400, 400))
                     explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
             }
         })
@@ -86,7 +85,7 @@ class Panel: JPanel() {
             it.tick()
             if (it.completed()) {
                 toRemove.add(it)
-                blockWidgets.add(it.createFallingBlockWidget())
+                blockWidgets.add(it.createFallingBlockWidgetOn(dustAreaWidget.dustArea()))
             }
         }
         explosionWidgets.removeAll(toRemove)
