@@ -40,8 +40,9 @@ class GameField(
 
     private fun findYofSubMatrixFor(area: Area): Int {
         var result = area.y
+        val matrixWidth = matrix.size
         for (x in area.x..<(area.x + area.width)) {
-            if (x < 0) continue
+            if (x < 0 || x >= matrixWidth) continue
             for (y in 0..area.y) {
                 if (matrix[x][y] && y < result) result = y
             }
@@ -53,9 +54,17 @@ class GameField(
         val subMatrix: Array<BooleanArray> = Array(width) { BooleanArray(height) }
         for (xx in 0..<width) {
             for (yy in 0..<height) {
-                subMatrix[xx][yy] = matrix[xx + x][yy + y]
+                subMatrix[xx][yy] = matrixValueOrFalse(xx + x, yy + y)
             }
         }
         return subMatrix
+    }
+
+    private fun matrixValueOrFalse(x: Int, y: Int): Boolean {
+        return try {
+            matrix[x][y]
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            false
+        }
     }
 }
