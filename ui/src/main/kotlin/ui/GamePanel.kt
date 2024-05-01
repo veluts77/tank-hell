@@ -15,6 +15,8 @@ import kotlin.math.max
 
 class GamePanel: JPanel() {
 
+    private var isHealthy = true
+
     private val w = 800
     private val h = 600
 
@@ -37,18 +39,21 @@ class GamePanel: JPanel() {
     }
 
     override fun paintComponent(g: Graphics?) {
-        val beginTime = System.currentTimeMillis()
-
-        drawScene(imgBuffer)
-        processLogic()
-        (g as Graphics2D).drawImage(imgBuffer, 0, 0, null)
-
-        val elapsedTime = System.currentTimeMillis() - beginTime
-        showTime(g, elapsedTime)
-
         try {
+            val beginTime = System.currentTimeMillis()
+
+            drawScene(imgBuffer)
+            if (isHealthy) processLogic()
+            (g as Graphics2D).drawImage(imgBuffer, 0, 0, null)
+
+            val elapsedTime = System.currentTimeMillis() - beginTime
+            showTime(g, elapsedTime)
+
             Thread.sleep(max(25 - elapsedTime, 1))
         } catch (e: InterruptedException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            isHealthy = false
             e.printStackTrace()
         }
     }
