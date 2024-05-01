@@ -79,7 +79,10 @@ class GamePanel: JPanel() {
         val toRemove = HashSet<FallingDustBlockWidget>()
         blockWidgets.forEach {
             it.tick()
-            if (it.completed()) toRemove.add(it)
+            if (it.completed()) {
+                it.applyTo(gameFieldWidget)
+                toRemove.add(it)
+            }
         }
         blockWidgets.removeAll(toRemove)
     }

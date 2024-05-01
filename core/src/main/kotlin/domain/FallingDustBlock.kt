@@ -59,4 +59,8 @@ class FallingDustBlock(
     }
 
     fun completed() = fallActionsCounter > width
+
+    fun applyTo(gameField: GameField, xPos: Int, yPos: Int) {
+        gameField.applySubMatrix(xPos, yPos, matrix)
+    }
 }

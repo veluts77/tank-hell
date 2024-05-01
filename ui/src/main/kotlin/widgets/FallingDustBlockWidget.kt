@@ -12,13 +12,18 @@ class FallingDustBlockWidget(
     private val width: Int = matrix.size
     private val height: Int = matrix[0].size
     private val fallingDustBlock = FallingDustBlock(matrix)
+    private val backgroundColor = Color(20, 55, 75, 255)
 
     fun tick() = fallingDustBlock.tick()
 
     fun completed() = fallingDustBlock.completed()
 
+    fun applyTo(gameFieldWidget: GameFieldWidget) {
+        fallingDustBlock.applyTo(gameFieldWidget.gameField(), xPos, yPos)
+    }
+
     fun draw(g2: Graphics2D) {
-        g2.color = Color.black
+        g2.color = backgroundColor
         g2.fillRect(xPos, yPos, width, height)
         g2.color = Color.blue
         for (y in 0..<height) {

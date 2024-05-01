@@ -67,4 +67,16 @@ class GameField(
             false
         }
     }
+
+    fun applySubMatrix(xPos: Int, yPos: Int, subMatrix: Array<BooleanArray>) {
+        for (x in subMatrix.indices) {
+            val matrixX = x + xPos
+            if (matrixX < 0 || matrixX >= width) continue
+            for (y in subMatrix[0].indices) {
+                val matrixY = y + yPos
+                if (matrixY < 0 || matrixY >= height) continue
+                matrix[matrixX][matrixY] = subMatrix[x][y]
+            }
+        }
+    }
 }
