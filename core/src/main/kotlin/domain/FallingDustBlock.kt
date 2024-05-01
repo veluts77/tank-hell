@@ -18,11 +18,20 @@ class FallingDustBlock(
         for (x in 0..<radius)
             for (y in 0..<radius)
                 if (x * x + y * y < radius * radius) {
-                    matrix[x + halfWidth][y + yCorrection] = false
-                    matrix[-x + halfWidth][y + yCorrection] = false
-                    matrix[x + halfWidth][-y + yCorrection] = false
-                    matrix[-x + halfWidth][-y + yCorrection] = false
+                    tryReset(x + halfWidth, y + yCorrection)
+                    tryReset(-x + halfWidth, y + yCorrection)
+                    tryReset(x + halfWidth, -y + yCorrection)
+                    tryReset(-x + halfWidth, -y + yCorrection)
                 }
+    }
+
+    private fun tryReset(x: Int, y: Int): Boolean {
+        try {
+            matrix[x][y] = false
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            return false
+        }
+        return true
     }
 
     fun tick() {
