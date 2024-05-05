@@ -1,0 +1,39 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class GameField {
++ GameField(width: Int, height: Int)
++ at(x: Int, y: Int): Boolean
++ fun subMatrixFor(explosion: Explosion): Array<BooleanArray>
++ applySubMatrix(xPos: Int, yPos: Int, subMatrix: Array<BooleanArray>)
+}
+
+class Area {
++ x: Int
++ y: Int
++ width: Int
++ height: Int
++ Area(x: Int, y: Int, width: Int, height: Int)
+}
+
+class Explosion {
++ Explosion(centerX: Int, centerY: Int, radius: Int, speedFactor: Int)
++ tick()
++ completed(): Boolean
++ currentExplosionArea(): Area
+}
+
+class FallingDustBlock {
++ FallingDustBlock()
++ tick()
++ completed(): Boolean
++ at(x: Int, y: Int): Boolean
++ applyTo(gameField: GameField, xPos: Int, yPos: Int)
+}
+
+
+GameField --> Explosion: uses
+Explosion --> Area: creates
+GameField <-- FallingDustBlock: uses
+
+@enduml
