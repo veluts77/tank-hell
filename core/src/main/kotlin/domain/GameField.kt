@@ -2,11 +2,17 @@ package domain
 
 import kotlin.math.sin
 
+/**
+ *  Game field with (0,0) corresponding to top left corner.
+ */
 class GameField(
     private val width: Int,
     private val height: Int
 ) {
 
+    /**
+     * Represents hill-like structure where 'false' is white space and 'true' is dirt
+     */
     private val matrix: Array<BooleanArray> = Array(width) {
         BooleanArray(height) {
             false
@@ -17,6 +23,9 @@ class GameField(
         buildSineField()
     }
 
+    /**
+     * Initial shape of the game field, simulating some sort of hill landscape
+     */
     private fun buildSineField() {
         for (x in 0..<width) {
             for (y in 0..<height) {
@@ -25,10 +34,16 @@ class GameField(
         }
     }
 
+    /**
+     * Find if there is a dirt (true) of white space (false) at the specific point provided
+     */
     fun at(x: Int, y: Int): Boolean {
         return matrix[x][y]
     }
 
+    /**
+     * Returns a matrix representing a shape of an explosion
+     */
     fun subMatrixFor(explosion: Explosion): Array<BooleanArray> {
         val area = explosion.currentExplosionArea()
         val x = area.x
@@ -68,6 +83,10 @@ class GameField(
         }
     }
 
+    /**
+     * Apply provided (sub)matrix at the specific position of Game field.
+     * The method if boundary safe, meaning it causes no ArrayIndexOutOfBoundsException.
+     */
     fun applySubMatrix(xPos: Int, yPos: Int, subMatrix: Array<BooleanArray>) {
         for (x in subMatrix.indices) {
             val matrixX = x + xPos
