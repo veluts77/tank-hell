@@ -3,6 +3,7 @@ package ui
 import widgets.ExplosionWidget
 import widgets.FallingDustBlockWidget
 import widgets.GameFieldWidget
+import widgets.TankWidget
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -23,12 +24,16 @@ class GamePanel: JPanel() {
     private val imgBuffer = BufferedImage(
         w, h, BufferedImage.TYPE_INT_RGB)
 
+    private val tankWidgets = mutableListOf<TankWidget>()
     private val blockWidgets = mutableListOf<FallingDustBlockWidget>()
     private val explosionWidgets = mutableListOf<ExplosionWidget>()
     private val gameFieldWidget = GameFieldWidget(w, h)
 
+
     init {
         preferredSize = Dimension(w, h)
+
+        addTanks()
 
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
@@ -36,6 +41,12 @@ class GamePanel: JPanel() {
                     explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
             }
         })
+    }
+
+    private fun addTanks() {
+        tankWidgets.add(TankWidget(100, 100, Color.orange))
+        tankWidgets.add(TankWidget(300, 300, Color.gray))
+        tankWidgets.add(TankWidget(600, 400, Color.magenta))
     }
 
     override fun paintComponent(g: Graphics?) {
@@ -64,6 +75,7 @@ class GamePanel: JPanel() {
         val g2 = image.createGraphics()
         gameFieldWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
+        tankWidgets.forEach { it.draw(g2) }
         explosionWidgets.forEach { it.draw(g2) }
 
         val endTime = System.currentTimeMillis()
