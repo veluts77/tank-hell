@@ -13,7 +13,9 @@ class TankWidget(
 
     fun tick() = tank.tick()
 
-    fun completed() = tank.completed()
+    fun startFalling() = tank.startFalling()
+
+    fun stopFalling() = tank.stopFalling()
 
     fun draw(g2: Graphics2D) {
         val a = tank.area()
@@ -21,4 +23,8 @@ class TankWidget(
         g2.color = color
         g2.fillRect(a.x, a.y, a.width, a.height)
     }
+
+    fun explode() = ExplosionWidget(xPos, yPos, 50, 10)
+
+    fun area() = tank.area()
 }

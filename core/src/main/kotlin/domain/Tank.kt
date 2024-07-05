@@ -1,16 +1,23 @@
 package domain
 
 class Tank(
-    x: Int,
-    y: Int,
+    private var x: Int,
+    private var y: Int,
 ) {
-    private val area = Area(x, y, 40, 20)
+
+    private var falling = false
 
     fun tick() {
-        //TODO
+        if (falling) y += 10
     }
 
-    fun completed() = false
+    fun area() = Area(x, y, 40, 20)
 
-    fun area() = area
+    fun startFalling() {
+        falling = true
+    }
+
+    fun stopFalling() {
+        falling = false
+    }
 }

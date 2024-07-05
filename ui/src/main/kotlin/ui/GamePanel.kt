@@ -44,9 +44,9 @@ class GamePanel: JPanel() {
     }
 
     private fun addTanks() {
-        tankWidgets.add(TankWidget(100, 100, Color.orange))
-        tankWidgets.add(TankWidget(300, 300, Color.gray))
-        tankWidgets.add(TankWidget(600, 400, Color.magenta))
+        tankWidgets.add(TankWidget(100, 50, Color.orange))
+        tankWidgets.add(TankWidget(300, 50, Color.gray))
+        tankWidgets.add(TankWidget(600, 50, Color.magenta))
     }
 
     override fun paintComponent(g: Graphics?) {
@@ -85,6 +85,7 @@ class GamePanel: JPanel() {
     private fun processLogic() {
         processFallingBlocks()
         processExplosions()
+        processTanks()
     }
 
     private fun processFallingBlocks() {
@@ -109,6 +110,31 @@ class GamePanel: JPanel() {
             }
         }
         explosionWidgets.removeAll(toRemove)
+    }
+
+    private fun processTanks() {
+        val toRemove = HashSet<TankWidget>()
+        tankWidgets.forEach {
+            it.tick()
+            processTankFalling(it)
+            val destroyed = processTankWounds(it)
+            if (destroyed) {
+                toRemove.add(it)
+                explosionWidgets.add(it.explode())
+            }
+        }
+        tankWidgets.removeAll(toRemove)
+    }
+
+    private fun processTankWounds(tankWidget: TankWidget): Boolean {
+        return false
+    }
+
+    private fun processTankFalling(tankWidget: TankWidget) {
+        val gameField = gameFieldWidget.gameField()
+        val area = tankWidget.area()
+        if (gameField.at(area.x, area.y)) tankWidget.stopFalling()
+        else tankWidget.startFalling()
     }
 
     private fun showTime(g: Graphics, time: Long) {
