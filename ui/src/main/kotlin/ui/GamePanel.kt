@@ -133,8 +133,19 @@ class GamePanel: JPanel() {
     private fun processTankFalling(tankWidget: TankWidget) {
         val gameField = gameFieldWidget.gameField()
         val area = tankWidget.area()
-        if (gameField.at(area.x, area.y)) tankWidget.stopFalling()
-        else tankWidget.startFalling()
+        val tankBottomY = area.y + area.height
+        val tankMiddleX = area.x + area.width / 2
+        if (tankBottomY >= h || gameField.at(tankMiddleX, tankBottomY)) tankWidget.stopFalling()
+        else {
+            tankWidget.startFalling()
+            gameField.applySubMatrix(area.x, area.y, emptyMatrix(area.width, area.height))
+        }
+    }
+
+    private fun emptyMatrix(width: Int, height: Int) = Array(width) {
+        BooleanArray(height) {
+            false
+        }
     }
 
     private fun showTime(g: Graphics, time: Long) {

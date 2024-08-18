@@ -11,6 +11,7 @@ class Tank(
         if (falling) y += 10
     }
 
+    // Todo: место для оптимизации
     fun area() = Area(x, y, 40, 20)
 
     fun startFalling() {
