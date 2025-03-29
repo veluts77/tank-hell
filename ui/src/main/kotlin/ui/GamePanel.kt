@@ -1,9 +1,6 @@
 package ui
 
-import widgets.ExplosionWidget
-import widgets.FallingDustBlockWidget
-import widgets.GameFieldWidget
-import widgets.TankWidget
+import widgets.*
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -27,6 +24,7 @@ class GamePanel: JPanel() {
     private val tankWidgets = mutableListOf<TankWidget>()
     private val blockWidgets = mutableListOf<FallingDustBlockWidget>()
     private val explosionWidgets = mutableListOf<ExplosionWidget>()
+    private val bulletWidgets = mutableListOf<BulletWidget>()
     private val gameFieldWidget = GameFieldWidget(w, h)
 
 
@@ -38,7 +36,8 @@ class GamePanel: JPanel() {
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 if (e != null)
-                    explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
+                    //explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
+                    bulletWidgets.add(BulletWidget(e.x, e.y, 1, 10))
             }
         })
     }
@@ -77,6 +76,7 @@ class GamePanel: JPanel() {
         blockWidgets.forEach { it.draw(g2) }
         tankWidgets.forEach { it.draw(g2) }
         explosionWidgets.forEach { it.draw(g2) }
+        bulletWidgets.forEach { it.draw(g2) }
 
         val endTime = System.currentTimeMillis()
         showInnerTime(g2, endTime - beginTime)
@@ -86,6 +86,7 @@ class GamePanel: JPanel() {
         processFallingBlocks()
         processExplosions()
         processTanks()
+        processBullets()
     }
 
     private fun processFallingBlocks() {
@@ -127,7 +128,7 @@ class GamePanel: JPanel() {
     }
 
     private fun processTankWounds(tankWidget: TankWidget): Boolean {
-        return false
+        return false // Todo
     }
 
     private fun processTankFalling(tankWidget: TankWidget) {
@@ -140,6 +141,21 @@ class GamePanel: JPanel() {
             tankWidget.startFalling()
             gameField.applySubMatrix(area.x, area.y, emptyMatrix(area.width, area.height))
         }
+    }
+
+    private fun processBullets() {
+        val toRemove = HashSet<BulletWidget>()
+        val gameField = gameFieldWidget.gameField()
+        bulletWidgets.forEach {
+            it.tick()
+            if (it.flownAwayFrom(gameField)) {
+                toRemove.add(it)
+            } else if (it.collided(gameField) || it.collided(tankWidgets)) {
+                toRemove.add(it)
+                explosionWidgets.add(it.explode())
+            }
+        }
+        bulletWidgets.removeAll(toRemove)
     }
 
     private fun emptyMatrix(width: Int, height: Int) = Array(width) {

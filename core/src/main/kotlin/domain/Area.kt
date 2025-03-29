@@ -5,4 +5,8 @@ class Area(
     val y: Int,
     val width: Int,
     val height: Int
-)
+) {
+    fun intersects(area: Area): Boolean {
+        return false // Todo
+    }
+}

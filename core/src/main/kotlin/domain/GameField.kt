@@ -41,6 +41,10 @@ class GameField(
         return matrix[x][y]
     }
 
+    fun withinField(x: Int, y: Int): Boolean {
+        return x >= 0 && y >= 0 && x < width && y < height
+    }
+
     /**
      * Returns a matrix representing a shape of an explosion
      */
