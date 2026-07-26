@@ -24,9 +24,18 @@ class TankWidget(
         g2.fillRect(a.x, a.y, a.width, a.height)
     }
 
-    fun explode() = ExplosionWidget(xPos, yPos, 50, 10)
+    fun explode(): ExplosionWidget {
+        val a = tank.area()
+        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10)
+    }
 
     fun area() = tank.area()
+
+    fun health() = tank.health()
+
+    fun applyDamage(amount: Int) = tank.applyDamage(amount)
+
+    fun isDestroyed() = tank.isDestroyed()
 
     fun muzzlePoint() = tank.muzzlePoint()
 

@@ -1,5 +1,6 @@
 package widgets
 
+import domain.Area
 import domain.GameField
 import domain.Explosion
 import java.awt.Color
@@ -16,6 +17,8 @@ class ExplosionWidget(
     fun tick() = explosion.tick()
 
     fun completed() = explosion.completed()
+
+    fun damageFor(area: Area) = explosion.damageFor(area)
 
     fun draw(g2: Graphics2D) {
         val a = explosion.currentExplosionArea()

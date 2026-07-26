@@ -30,9 +30,9 @@ class TurnController(
 
     fun fire() {
         if (!canControl()) return
-        val tank = activeTankWidget() ?: return
-        val (x, y) = tank.muzzlePoint()
-        onFire(BulletWidget(x, y, tank.aimAngleDegrees(), tank.power()))
+        val tankWidget = activeTankWidget() ?: return
+        val (x, y) = tankWidget.muzzlePoint()
+        onFire(BulletWidget(x, y, tankWidget.aimAngleDegrees(), tankWidget.power(), tankWidget))
         shotInProgress = true
     }
 

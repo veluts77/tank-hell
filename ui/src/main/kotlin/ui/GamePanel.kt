@@ -194,17 +194,20 @@ class GamePanel : JPanel() {
         tankWidgets.forEach {
             it.tick()
             processTankFalling(it)
-            val destroyed = processTankWounds(it)
-            if (destroyed) {
+            if (it.isDestroyed()) {
                 toRemove.add(it)
-                explosionWidgets.add(it.explode())
+                val explosion = it.explode()
+                explosionWidgets.add(explosion)
+                applyExplosionDamage(explosion)
             }
         }
         tankWidgets.removeAll(toRemove)
     }
 
-    private fun processTankWounds(tankWidget: TankWidget): Boolean {
-        return false // Todo
+    private fun applyExplosionDamage(explosionWidget: ExplosionWidget) {
+        tankWidgets.forEach { tankWidget ->
+            tankWidget.applyDamage(explosionWidget.damageFor(tankWidget.area()))
+        }
     }
 
     private fun processTankFalling(tankWidget: TankWidget) {
@@ -228,7 +231,9 @@ class GamePanel : JPanel() {
                 toRemove.add(it)
             } else if (it.collided(gameField) || it.collided(tankWidgets)) {
                 toRemove.add(it)
-                explosionWidgets.add(it.explode())
+                val explosion = it.explode()
+                explosionWidgets.add(explosion)
+                applyExplosionDamage(explosion)
             }
         }
         bulletWidgets.removeAll(toRemove)
