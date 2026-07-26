@@ -27,4 +27,16 @@ class TankWidget(
     fun explode() = ExplosionWidget(xPos, yPos, 50, 10)
 
     fun area() = tank.area()
+
+    fun muzzlePoint() = tank.muzzlePoint()
+
+    fun aimAngleDegrees() = tank.aimAngleDegrees()
+
+    fun power() = tank.power()
+
+    fun adjustAimAngle(delta: Int) = tank.adjustAimAngle(delta)
+
+    fun adjustPower(delta: Int) = tank.adjustPower(delta)
+
+    //TODO подумать над альтернативой такому количеству прокси функций и использовать tank()
 }

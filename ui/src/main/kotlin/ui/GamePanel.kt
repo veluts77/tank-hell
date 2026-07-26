@@ -5,13 +5,17 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Graphics2D
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.Polygon
+import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
+import javax.swing.AbstractAction
+import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.KeyStroke
 import kotlin.math.max
 
-class GamePanel: JPanel() {
+class GamePanel : JPanel() {
 
     private var isHealthy = true
 
@@ -27,25 +31,58 @@ class GamePanel: JPanel() {
     private val bulletWidgets = mutableListOf<BulletWidget>()
     private val gameFieldWidget = GameFieldWidget(w, h)
 
+    val turnController = TurnController(tankWidgets) { bullet ->
+        bulletWidgets.add(bullet)
+    }
 
     init {
         preferredSize = Dimension(w, h)
+        isFocusable = true
 
         addTanks()
-
-        addMouseListener(object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent?) {
-                if (e != null)
-                    //explosionWidgets.add(ExplosionWidget(e.x, e.y, 100, 10))
-                    bulletWidgets.add(BulletWidget(e.x, e.y, 1, 10))
-            }
-        })
+        installKeyBindings()
     }
 
     private fun addTanks() {
         tankWidgets.add(TankWidget(100, 50, Color.orange))
         tankWidgets.add(TankWidget(300, 50, Color.gray))
         tankWidgets.add(TankWidget(600, 50, Color.magenta))
+    }
+
+    private fun installKeyBindings() {
+        val inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        val actionMap = actionMap
+
+        fun bind(name: String, keyStroke: KeyStroke, action: () -> Unit) {
+            inputMap.put(keyStroke, name)
+            actionMap.put(name, object : AbstractAction() {
+                override fun actionPerformed(e: ActionEvent?) {
+                    action()
+                }
+            })
+        }
+
+        bind("angleLeft", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)) {
+            turnController.adjustAngle(-1)
+        }
+        bind("angleRight", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)) {
+            turnController.adjustAngle(1)
+        }
+        bind("angleLeftFast", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_DOWN_MASK)) {
+            turnController.adjustAngle(-5)
+        }
+        bind("angleRightFast", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK)) {
+            turnController.adjustAngle(5)
+        }
+        bind("powerUp", KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)) {
+            turnController.adjustPower(1)
+        }
+        bind("powerDown", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)) {
+            turnController.adjustPower(-1)
+        }
+        bind("fire", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0)) {
+            turnController.fire()
+        }
     }
 
     override fun paintComponent(g: Graphics?) {
@@ -75,11 +112,42 @@ class GamePanel: JPanel() {
         gameFieldWidget.draw(g2)
         blockWidgets.forEach { it.draw(g2) }
         tankWidgets.forEach { it.draw(g2) }
+        drawActiveTankMarker(g2)
         explosionWidgets.forEach { it.draw(g2) }
         bulletWidgets.forEach { it.draw(g2) }
+        drawHud(g2)
 
         val endTime = System.currentTimeMillis()
         showInnerTime(g2, endTime - beginTime)
+        g2.dispose()
+    }
+
+    private fun drawActiveTankMarker(g2: Graphics2D) {
+        val tankWidget = turnController.activeTankWidget() ?: return
+        val a = tankWidget.area()
+        val tipX = a.x + a.width / 2
+        val tipY = a.y - 4
+        g2.color = Color.yellow
+        g2.fillPolygon(
+            Polygon(
+                intArrayOf(tipX, tipX - 6, tipX + 6),
+                intArrayOf(tipY, tipY - 10, tipY - 10),
+                3
+            )
+        )
+    }
+
+    private fun drawHud(g2: Graphics2D) {
+        val tankWidget = turnController.activeTankWidget()
+        val angle = tankWidget?.aimAngleDegrees() ?: 0
+        val power = tankWidget?.power() ?: 0
+        val tankLabel = tankWidget?.let { "Tank #${turnController.activeIndex() + 1}" } ?: "—"
+
+        g2.color = Color.white
+        g2.drawString("Active: $tankLabel", 10, 20)
+        g2.drawString("Angle: $angle°", 10, 80)
+        g2.drawString("Power: $power", 10, 96)
+        g2.drawString(turnController.statusText(), 10, 112)
     }
 
     private fun processLogic() {
@@ -87,6 +155,14 @@ class GamePanel: JPanel() {
         processExplosions()
         processTanks()
         processBullets()
+        checkWorldSettled()
+    }
+
+    private fun checkWorldSettled() {
+        if (!turnController.shotInProgress()) return
+        if (bulletWidgets.isEmpty() && explosionWidgets.isEmpty() && blockWidgets.isEmpty()) {
+            turnController.onWorldSettled()
+        }
     }
 
     private fun processFallingBlocks() {

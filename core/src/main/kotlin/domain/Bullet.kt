@@ -7,14 +7,15 @@ import kotlin.math.sin
 class Bullet (
     private val startX: Int,
     private val startY: Int,
-    angle: Int,
+    angleDegrees: Int,
     private val power: Int
 ) {
     private var x = 0.0
     private var y = 0.0
     private var t = 0.0
-    private val cosa = cos(angle.toDouble())
-    private val sina = sin(angle.toDouble())
+    private val radians = Math.toRadians(angleDegrees.toDouble())
+    private val cosa = cos(radians)
+    private val sina = sin(radians)
 
     init {
         x = startX.toDouble()
