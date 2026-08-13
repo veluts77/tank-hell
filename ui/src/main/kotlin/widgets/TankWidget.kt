@@ -1,5 +1,6 @@
 package widgets
 
+import domain.Area
 import domain.Tank
 import java.awt.BasicStroke
 import java.awt.Color
@@ -24,6 +25,8 @@ class TankWidget(
 
     fun draw(g2: Graphics2D) {
         val a = tank.area()
+        drawHealthBar(g2, a)
+
         val oldStroke = g2.stroke
         val oldAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING)
         val outlineColor = color.darker()
@@ -85,6 +88,15 @@ class TankWidget(
 
     fun adjustPower(delta: Int) = tank.adjustPower(delta)
 
+    private fun drawHealthBar(g2: Graphics2D, a: Area) {
+        val barY = a.y - HEALTH_BAR_HEIGHT - HEALTH_BAR_GAP
+        val greenWidth = (a.width * tank.health() / Tank.MAX_HEALTH.toDouble()).roundToInt()
+        g2.color = Color.GREEN
+        g2.fillRect(a.x, barY, greenWidth, HEALTH_BAR_HEIGHT)
+        g2.color = Color.RED
+        g2.fillRect(a.x + greenWidth, barY, a.width - greenWidth, HEALTH_BAR_HEIGHT)
+    }
+
     private fun turretCenter(): Pair<Double, Double> {
         val a = tank.area()
         return Pair(a.x + a.width / 2.0, a.y + TURRET_CENTER_Y)
@@ -116,5 +128,7 @@ class TankWidget(
         private const val TURRET_CENTER_Y = TURRET_Y_OFFSET + TURRET_HEIGHT / 2.0
         private const val BARREL_LENGTH = 18.0
         private const val BARREL_THICKNESS = 4f
+        private const val HEALTH_BAR_HEIGHT = 2
+        private const val HEALTH_BAR_GAP = 1
     }
 }
