@@ -126,7 +126,7 @@ class GamePanel : JPanel() {
         val tankWidget = turnController.activeTankWidget() ?: return
         val a = tankWidget.area()
         val tipX = a.x + a.width / 2
-        val tipY = a.y - 4
+        val tipY = a.y - 15
         g2.color = Color.yellow
         g2.fillPolygon(
             Polygon(

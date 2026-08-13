@@ -26,11 +26,6 @@ class Tank(
 
     fun isDestroyed() = health <= 0
 
-    fun muzzlePoint(): Pair<Int, Int> {
-        val a = area()
-        return Pair(a.x + a.width / 2, a.y)
-    }
-
     fun aimAngleDegrees() = aimAngleDegrees
 
     fun power() = power
