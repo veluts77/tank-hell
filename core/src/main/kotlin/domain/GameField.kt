@@ -1,13 +1,16 @@
 package domain
 
-import kotlin.math.sin
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.random.Random
 
 /**
  *  Game field with (0,0) corresponding to top left corner.
  */
 class GameField(
     private val width: Int,
-    private val height: Int
+    private val height: Int,
+    private val random: Random = Random.Default
 ) {
 
     /**
@@ -20,18 +23,75 @@ class GameField(
     }
 
     init {
-        buildSineField()
+        buildLandscape()
     }
 
     /**
-     * Initial shape of the game field, simulating some sort of hill landscape
+     * Random natural landscape: plains interrupted by hills and mountain ranges.
+     * Peaks leave the top quarter of the field as sky; valleys stay above the bottom 10%.
      */
-    private fun buildSineField() {
+    private fun buildLandscape() {
+        val minSurfaceY = (height * TOP_SKY_FRACTION).toInt()
+        val maxSurfaceY = (height * (1.0 - BOTTOM_GROUND_FRACTION)).toInt()
+        val yRange = maxSurfaceY - minSurfaceY
+        val elevation = generateElevation()
         for (x in 0..<width) {
-            for (y in 0..<height) {
-                if (y > 200 * sin(0.01 * x) + 300) matrix[x][y] = true
+            val surfaceY = maxSurfaceY - (elevation[x] * yRange).toInt()
+            for (y in (surfaceY + 1)..<height) {
+                matrix[x][y] = true
             }
         }
+    }
+
+    /**
+     * 1D elevation in 0..1 (1 = peak). Mixes rolling plains/hills everywhere
+     * with larger mountains only where a low-frequency mask is high.
+     */
+    private fun generateElevation(): DoubleArray {
+        val plains = valueNoise((width / 2).coerceAtLeast(2))
+        val hills = valueNoise((width / 4).coerceAtLeast(2))
+        val mountains = valueNoise((width / 10).coerceAtLeast(2))
+        val detail = valueNoise(DETAIL_WAVELENGTH.coerceIn(2, (width / 2).coerceAtLeast(2)))
+        val maskNoise = valueNoise((width * 2 / 3).coerceAtLeast(2))
+
+        val combined = DoubleArray(width) { x ->
+            val mountainMask = smoothstep(MASK_EDGE0, MASK_EDGE1, maskNoise[x])
+            plains[x] * PLAINS_AMP +
+                hills[x] * HILLS_AMP +
+                (mountains[x] * MOUNTAINS_AMP + detail[x] * DETAIL_AMP) * mountainMask
+        }
+        return normalize(combined)
+    }
+
+    private fun valueNoise(wavelength: Int): DoubleArray {
+        val step = wavelength.coerceAtLeast(1)
+        val lattice = DoubleArray(width / step + 2) { random.nextDouble() }
+        return DoubleArray(width) { x ->
+            val index = (x / step).coerceAtMost(lattice.size - 2)
+            val t = (x % step).toDouble() / step
+            cosineInterpolate(lattice[index], lattice[index + 1], t)
+        }
+    }
+
+    private fun cosineInterpolate(a: Double, b: Double, t: Double): Double {
+        val f = (1 - cos(t * PI)) * 0.5
+        return a * (1 - f) + b * f
+    }
+
+    private fun smoothstep(edge0: Double, edge1: Double, x: Double): Double {
+        val t = ((x - edge0) / (edge1 - edge0)).coerceIn(0.0, 1.0)
+        return t * t * (3 - 2 * t)
+    }
+
+    private fun normalize(values: DoubleArray): DoubleArray {
+        var min = values[0]
+        var max = values[0]
+        for (v in values) {
+            if (v < min) min = v
+            if (v > max) max = v
+        }
+        val span = (max - min).coerceAtLeast(1e-9)
+        return DoubleArray(values.size) { i -> (values[i] - min) / span }
     }
 
     /**
@@ -101,5 +161,17 @@ class GameField(
                 matrix[matrixX][matrixY] = subMatrix[x][y]
             }
         }
+    }
+
+    companion object {
+        private const val TOP_SKY_FRACTION = 0.30
+        private const val BOTTOM_GROUND_FRACTION = 0.15
+        private const val DETAIL_WAVELENGTH = 30
+        private const val PLAINS_AMP = 0.15
+        private const val HILLS_AMP = 0.25
+        private const val MOUNTAINS_AMP = 0.4
+        private const val DETAIL_AMP = 0.08
+        private const val MASK_EDGE0 = 0.4
+        private const val MASK_EDGE1 = 0.8
     }
 }
