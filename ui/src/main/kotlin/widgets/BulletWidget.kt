@@ -2,6 +2,7 @@ package widgets
 
 import domain.Bullet
 import domain.GameField
+import domain.Wind
 import java.awt.Color
 import java.awt.Graphics2D
 
@@ -10,9 +11,10 @@ class BulletWidget(
     startY: Int,
     angle: Int,
     power: Int,
+    wind: Wind,
     private val owner: TankWidget
 ) {
-    private val bullet = Bullet(startX, startY, angle, power)
+    private val bullet = Bullet(startX, startY, angle, power, wind)
     private var leftOwner = false
 
     fun tick() = bullet.tick()

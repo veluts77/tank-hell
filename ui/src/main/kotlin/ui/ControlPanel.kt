@@ -12,6 +12,7 @@ class ControlPanel(
     private val activeLabel = JLabel()
     private val angleLabel = JLabel()
     private val powerLabel = JLabel()
+    private val windLabel = JLabel()
     private val statusLabel = JLabel()
 
     private val angleMinus = JButton("Angle −")
@@ -30,6 +31,7 @@ class ControlPanel(
         add(activeLabel)
         add(angleLabel)
         add(powerLabel)
+        add(windLabel)
         add(statusLabel)
         add(angleMinus)
         add(anglePlus)
@@ -47,6 +49,7 @@ class ControlPanel(
         activeLabel.text = tankWidget?.let { "Active: Tank #${turnController.activeIndex() + 1}" } ?: "Active: —"
         angleLabel.text = "Angle: ${tankWidget?.aimAngleDegrees() ?: 0}°"
         powerLabel.text = "Power: ${tankWidget?.power() ?: 0}"
+        windLabel.text = turnController.wind().displayText()
         statusLabel.text = turnController.statusText()
 
         angleMinus.isEnabled = canControl

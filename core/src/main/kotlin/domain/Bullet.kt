@@ -8,7 +8,8 @@ class Bullet (
     private val startX: Int,
     private val startY: Int,
     angleDegrees: Int,
-    private val power: Int
+    private val power: Int,
+    private val wind: Wind
 ) {
     private var x = 0.0
     private var y = 0.0
@@ -31,7 +32,11 @@ class Bullet (
 
     fun tick() {
         t += 1
-        x = startX + power * t * cosa
+        x = startX + power * t * cosa + WIND_FACTOR * wind.signedStrength() * t * t
         y = startY - power * t * sina + 0.1 * t * t
+    }
+
+    companion object {
+        const val WIND_FACTOR = 0.004
     }
 }

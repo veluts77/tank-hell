@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
 import javax.swing.AbstractAction
-import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.KeyStroke
 import kotlin.math.max
@@ -50,7 +49,7 @@ class GamePanel : JPanel() {
     }
 
     private fun installKeyBindings() {
-        val inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        val inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW)
         val actionMap = actionMap
 
         fun bind(name: String, keyStroke: KeyStroke, action: () -> Unit) {
@@ -147,7 +146,8 @@ class GamePanel : JPanel() {
         g2.drawString("Active: $tankLabel", 10, 20)
         g2.drawString("Angle: $angle°", 10, 80)
         g2.drawString("Power: $power", 10, 96)
-        g2.drawString(turnController.statusText(), 10, 112)
+        g2.drawString(turnController.wind().displayText(), 10, 112)
+        g2.drawString(turnController.statusText(), 10, 128)
     }
 
     private fun processLogic() {
