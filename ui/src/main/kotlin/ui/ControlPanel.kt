@@ -15,15 +15,15 @@ class ControlPanel(
     private val windLabel = JLabel()
     private val statusLabel = JLabel()
 
-    private val angleMinus = JButton("Angle −")
-    private val anglePlus = JButton("Angle +")
+    private val angleLeft = JButton("<<<")
+    private val angleRight = JButton(">>>")
     private val powerMinus = JButton("Power −")
     private val powerPlus = JButton("Power +")
     private val fireButton = JButton("Fire")
 
     init {
-        angleMinus.addActionListener { turnController.adjustAngle(-1) }
-        anglePlus.addActionListener { turnController.adjustAngle(1) }
+        angleLeft.addActionListener { turnController.adjustAngle(1) }
+        angleRight.addActionListener { turnController.adjustAngle(-1) }
         powerMinus.addActionListener { turnController.adjustPower(-1) }
         powerPlus.addActionListener { turnController.adjustPower(1) }
         fireButton.addActionListener { turnController.fire() }
@@ -33,8 +33,8 @@ class ControlPanel(
         add(powerLabel)
         add(windLabel)
         add(statusLabel)
-        add(angleMinus)
-        add(anglePlus)
+        add(angleLeft)
+        add(angleRight)
         add(powerMinus)
         add(powerPlus)
         add(fireButton)
@@ -52,8 +52,8 @@ class ControlPanel(
         windLabel.text = turnController.wind().displayText()
         statusLabel.text = turnController.statusText()
 
-        angleMinus.isEnabled = canControl
-        anglePlus.isEnabled = canControl
+        angleLeft.isEnabled = canControl
+        angleRight.isEnabled = canControl
         powerMinus.isEnabled = canControl
         powerPlus.isEnabled = canControl
         fireButton.isEnabled = canControl

@@ -62,16 +62,16 @@ class GamePanel : JPanel() {
         }
 
         bind("angleLeft", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)) {
-            turnController.adjustAngle(-1)
-        }
-        bind("angleRight", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)) {
             turnController.adjustAngle(1)
         }
+        bind("angleRight", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)) {
+            turnController.adjustAngle(-1)
+        }
         bind("angleLeftFast", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_DOWN_MASK)) {
-            turnController.adjustAngle(-5)
+            turnController.adjustAngle(5)
         }
         bind("angleRightFast", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK)) {
-            turnController.adjustAngle(5)
+            turnController.adjustAngle(-5)
         }
         bind("powerUp", KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)) {
             turnController.adjustPower(1)
