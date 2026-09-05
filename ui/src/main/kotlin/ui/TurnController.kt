@@ -18,7 +18,7 @@ class TurnController(
 
     fun shotInProgress() = shotInProgress
 
-    fun canControl() = !shotInProgress && tankWidgets.isNotEmpty()
+    fun canControl() = !shotInProgress && tankWidgets.size > 1
 
     fun wind() = wind
 

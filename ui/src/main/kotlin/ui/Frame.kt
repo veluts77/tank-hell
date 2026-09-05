@@ -1,33 +1,76 @@
 package ui
 
 import java.awt.BorderLayout
+import java.awt.CardLayout
 import javax.swing.JFrame
 import javax.swing.JPanel
 
 class Frame : JFrame(), Runnable {
 
-    private val gamePanel = GamePanel()
-    private val controlPanel = ControlPanel(gamePanel.turnController)
+    private val cards = CardLayout()
+    private val root = JPanel(cards)
+    private val playRoot = JPanel(BorderLayout())
+
+    @Volatile
+    private var playing = false
+    private var controlPanel: ControlPanel? = null
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
         setLocation(50, 50)
         title = "Tank Hell"
 
-        val root = JPanel(BorderLayout())
-        root.add(gamePanel, BorderLayout.CENTER)
-        root.add(controlPanel, BorderLayout.SOUTH)
+        val select = PlayerSelectPanel { playerCount -> startGame(playerCount) }
+        root.add(select, CARD_SELECT)
+        root.add(playRoot, CARD_PLAY)
         add(root)
 
         pack()
         isVisible = true
+    }
+
+    private fun startGame(playerCount: Int) {
+        playRoot.removeAll()
+
+        val gamePanel = GamePanel(playerCount) { backToSelect() }
+        val controls = ControlPanel(gamePanel.turnController)
+        controlPanel = controls
+
+        playRoot.add(gamePanel, BorderLayout.CENTER)
+        playRoot.add(controls, BorderLayout.SOUTH)
+
+        playing = true
+        cards.show(root, CARD_PLAY)
+        playRoot.revalidate()
+        pack()
         gamePanel.requestFocusInWindow()
+    }
+
+    private fun backToSelect() {
+        playing = false
+        controlPanel = null
+        playRoot.removeAll()
+        cards.show(root, CARD_SELECT)
+        root.revalidate()
+        pack()
     }
 
     override fun run() {
         while (true) {
-            controlPanel.refresh()
-            repaint()
+            try {
+                controlPanel?.refresh()
+                repaint()
+                if (!playing) {
+                    Thread.sleep(25)
+                }
+            } catch (_: InterruptedException) {
+                break
+            }
         }
+    }
+
+    companion object {
+        private const val CARD_SELECT = "select"
+        private const val CARD_PLAY = "play"
     }
 }

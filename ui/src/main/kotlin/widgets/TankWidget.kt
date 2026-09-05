@@ -11,11 +11,13 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 class TankWidget(
-    private val xPos: Int,
-    private val yPos: Int,
+    xPos: Int,
+    yPos: Int,
     private val color: Color
 ) {
     private val tank = Tank(xPos, yPos)
+
+    fun color() = color
 
     fun tick() = tank.tick()
 

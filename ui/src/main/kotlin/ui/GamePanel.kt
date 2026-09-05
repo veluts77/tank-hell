@@ -3,6 +3,7 @@ package ui
 import widgets.*
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Polygon
@@ -12,11 +13,18 @@ import java.awt.image.BufferedImage
 import javax.swing.AbstractAction
 import javax.swing.JPanel
 import javax.swing.KeyStroke
+import javax.swing.OverlayLayout
+import javax.swing.SwingUtilities
 import kotlin.math.max
 
-class GamePanel : JPanel() {
+class GamePanel(
+    playerCount: Int,
+    onNewGame: () -> Unit
+) : JPanel() {
 
     private var isHealthy = true
+    private var matchOver = false
+    private var victoryText: String? = null
 
     private val w = 800
     private val h = 600
@@ -29,23 +37,34 @@ class GamePanel : JPanel() {
     private val explosionWidgets = mutableListOf<ExplosionWidget>()
     private val bulletWidgets = mutableListOf<BulletWidget>()
     private val gameFieldWidget = GameFieldWidget(w, h)
+    private val victoryOverlay = VictoryOverlay(onNewGame)
 
     val turnController = TurnController(tankWidgets) { bullet ->
         bulletWidgets.add(bullet)
     }
 
     init {
+        layout = OverlayLayout(this)
         preferredSize = Dimension(w, h)
         isFocusable = true
+        add(victoryOverlay)
 
-        addTanks()
+        addTanks(playerCount)
         installKeyBindings()
     }
 
-    private fun addTanks() {
-        tankWidgets.add(TankWidget(100, 50, Color.orange))
-        tankWidgets.add(TankWidget(300, 50, Color.gray))
-        tankWidgets.add(TankWidget(600, 50, Color.magenta))
+    override fun isOptimizedDrawingEnabled() = false
+
+    private fun addTanks(playerCount: Int) {
+        for (i in 0 until playerCount) {
+            tankWidgets.add(
+                TankWidget(
+                    TankPalette.spawnX(i, playerCount),
+                    TankPalette.SPAWN_Y,
+                    TankPalette.COLORS[i]
+                )
+            )
+        }
     }
 
     private fun installKeyBindings() {
@@ -89,7 +108,7 @@ class GamePanel : JPanel() {
             val beginTime = System.currentTimeMillis()
 
             drawScene(imgBuffer)
-            if (isHealthy) processLogic()
+            if (isHealthy && !matchOver) processLogic()
             (g as Graphics2D).drawImage(imgBuffer, 0, 0, null)
 
             val elapsedTime = System.currentTimeMillis() - beginTime
@@ -118,6 +137,7 @@ class GamePanel : JPanel() {
 
         val endTime = System.currentTimeMillis()
         showInnerTime(g2, endTime - beginTime)
+        drawVictory(g2)
         g2.dispose()
     }
 
@@ -150,12 +170,36 @@ class GamePanel : JPanel() {
         g2.drawString(turnController.statusText(), 10, 128)
     }
 
+    private fun drawVictory(g2: Graphics2D) {
+        val text = victoryText ?: return
+        g2.color = Color(0, 0, 0, 160)
+        g2.fillRect(0, 0, w, h)
+        g2.color = Color.WHITE
+        g2.font = Font("SansSerif", Font.BOLD, 32)
+        val metrics = g2.fontMetrics
+        val x = (w - metrics.stringWidth(text)) / 2
+        val y = h / 2 - 10
+        g2.drawString(text, x, y)
+    }
+
     private fun processLogic() {
         processFallingBlocks()
         processExplosions()
         processTanks()
         processBullets()
         checkWorldSettled()
+        checkMatchOver()
+    }
+
+    private fun checkMatchOver() {
+        if (matchOver) return
+        if (tankWidgets.size > 1) return
+        if (bulletWidgets.isNotEmpty() || explosionWidgets.isNotEmpty() || blockWidgets.isNotEmpty()) return
+        matchOver = true
+        victoryText = tankWidgets.singleOrNull()
+            ?.let { "${TankPalette.displayName(it.color())} tank wins!" }
+            ?: "Draw!"
+        SwingUtilities.invokeLater { victoryOverlay.showResult() }
     }
 
     private fun checkWorldSettled() {
