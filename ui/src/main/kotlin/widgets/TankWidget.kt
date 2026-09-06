@@ -28,40 +28,7 @@ class TankWidget(
     fun draw(g2: Graphics2D) {
         val a = tank.area()
         drawHealthBar(g2, a)
-
-        val oldStroke = g2.stroke
-        val oldAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING)
-        val outlineColor = color.darker()
-
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-        g2.color = outlineColor
-        g2.fillRoundRect(a.x, a.y + TRACK_Y_OFFSET, a.width, TRACK_HEIGHT, TRACK_ARC, TRACK_ARC)
-
-        g2.color = color
-        g2.fillRoundRect(a.x + HULL_INSET, a.y + HULL_Y_OFFSET, a.width - HULL_INSET * 2, HULL_HEIGHT, HULL_ARC, HULL_ARC)
-        g2.color = outlineColor
-        g2.stroke = BasicStroke(1f)
-        g2.drawRoundRect(a.x + HULL_INSET, a.y + HULL_Y_OFFSET, a.width - HULL_INSET * 2, HULL_HEIGHT, HULL_ARC, HULL_ARC)
-
-        val (cx, cy) = turretCenter()
-        val (endX, endY) = barrelEnd()
-        g2.color = color
-        g2.stroke = BasicStroke(BARREL_THICKNESS, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-        g2.drawLine(cx.roundToInt(), cy.roundToInt(), endX.roundToInt(), endY.roundToInt())
-
-        val turretX = a.x + (a.width - TURRET_WIDTH) / 2
-        val turretY = a.y + TURRET_Y_OFFSET
-        g2.color = color
-        g2.fillRoundRect(turretX, turretY, TURRET_WIDTH, TURRET_HEIGHT, TURRET_ARC, TURRET_ARC)
-        g2.color = outlineColor
-        g2.stroke = BasicStroke(1f)
-        g2.drawRoundRect(turretX, turretY, TURRET_WIDTH, TURRET_HEIGHT, TURRET_ARC, TURRET_ARC)
-
-        g2.stroke = oldStroke
-        if (oldAntialiasing != null) {
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasing)
-        }
+        paint(g2, a.x, a.y, color, tank.aimAngleDegrees())
     }
 
     fun explode(): ExplosionWidget {
@@ -78,7 +45,8 @@ class TankWidget(
     fun isDestroyed() = tank.isDestroyed()
 
     fun muzzlePoint(): Pair<Int, Int> {
-        val (endX, endY) = barrelEnd()
+        val a = tank.area()
+        val (endX, endY) = barrelEnd(a.x, a.y, a.width, tank.aimAngleDegrees())
         return Pair(endX.roundToInt(), endY.roundToInt())
     }
 
@@ -99,23 +67,86 @@ class TankWidget(
         g2.fillRect(a.x + greenWidth, barY, a.width - greenWidth, HEALTH_BAR_HEIGHT)
     }
 
-    private fun turretCenter(): Pair<Double, Double> {
-        val a = tank.area()
-        return Pair(a.x + a.width / 2.0, a.y + TURRET_CENTER_Y)
-    }
-
-    private fun barrelEnd(): Pair<Double, Double> {
-        val (cx, cy) = turretCenter()
-        val radians = Math.toRadians(tank.aimAngleDegrees().toDouble())
-        return Pair(
-            cx + BARREL_LENGTH * cos(radians),
-            cy - BARREL_LENGTH * sin(radians)
-        )
-    }
-
     //TODO подумать над альтернативой такому количеству прокси функций и использовать tank()
 
     companion object {
+        const val BODY_WIDTH = 40
+        const val BODY_HEIGHT = 20
+
+        fun paint(
+            g2: Graphics2D,
+            x: Int,
+            y: Int,
+            color: Color,
+            angleDegrees: Int = 45
+        ) {
+            val oldStroke = g2.stroke
+            val oldAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING)
+            val outlineColor = color.darker()
+
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+            g2.color = outlineColor
+            g2.fillRoundRect(x, y + TRACK_Y_OFFSET, BODY_WIDTH, TRACK_HEIGHT, TRACK_ARC, TRACK_ARC)
+
+            g2.color = color
+            g2.fillRoundRect(
+                x + HULL_INSET,
+                y + HULL_Y_OFFSET,
+                BODY_WIDTH - HULL_INSET * 2,
+                HULL_HEIGHT,
+                HULL_ARC,
+                HULL_ARC
+            )
+            g2.color = outlineColor
+            g2.stroke = BasicStroke(1f)
+            g2.drawRoundRect(
+                x + HULL_INSET,
+                y + HULL_Y_OFFSET,
+                BODY_WIDTH - HULL_INSET * 2,
+                HULL_HEIGHT,
+                HULL_ARC,
+                HULL_ARC
+            )
+
+            val (cx, cy) = turretCenter(x, y, BODY_WIDTH)
+            val (endX, endY) = barrelEnd(x, y, BODY_WIDTH, angleDegrees)
+            g2.color = color
+            g2.stroke = BasicStroke(BARREL_THICKNESS, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+            g2.drawLine(cx.roundToInt(), cy.roundToInt(), endX.roundToInt(), endY.roundToInt())
+
+            val turretX = x + (BODY_WIDTH - TURRET_WIDTH) / 2
+            val turretY = y + TURRET_Y_OFFSET
+            g2.color = color
+            g2.fillRoundRect(turretX, turretY, TURRET_WIDTH, TURRET_HEIGHT, TURRET_ARC, TURRET_ARC)
+            g2.color = outlineColor
+            g2.stroke = BasicStroke(1f)
+            g2.drawRoundRect(turretX, turretY, TURRET_WIDTH, TURRET_HEIGHT, TURRET_ARC, TURRET_ARC)
+
+            g2.stroke = oldStroke
+            if (oldAntialiasing != null) {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasing)
+            }
+        }
+
+        private fun turretCenter(x: Int, y: Int, width: Int): Pair<Double, Double> {
+            return Pair(x + width / 2.0, y + TURRET_CENTER_Y)
+        }
+
+        private fun barrelEnd(
+            x: Int,
+            y: Int,
+            width: Int,
+            angleDegrees: Int
+        ): Pair<Double, Double> {
+            val (cx, cy) = turretCenter(x, y, width)
+            val radians = Math.toRadians(angleDegrees.toDouble())
+            return Pair(
+                cx + BARREL_LENGTH * cos(radians),
+                cy - BARREL_LENGTH * sin(radians)
+            )
+        }
+
         private const val TRACK_Y_OFFSET = 14
         private const val TRACK_HEIGHT = 6
         private const val TRACK_ARC = 3
