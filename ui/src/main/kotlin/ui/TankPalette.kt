@@ -24,7 +24,11 @@ object TankPalette {
         return if (index >= 0) NAMES[index] else "Unknown"
     }
 
-    fun spawnX(index: Int, playerCount: Int): Int {
+    fun allSpawnX(playerCount: Int): List<Int> {
+        return (0..<playerCount).map { spawnX(it, playerCount) }
+    }
+
+    private fun spawnX(index: Int, playerCount: Int): Int {
         val slot = (FIELD_WIDTH - 2 * PADDING) / playerCount
         return PADDING + index * slot + (slot - TANK_WIDTH) / 2
     }

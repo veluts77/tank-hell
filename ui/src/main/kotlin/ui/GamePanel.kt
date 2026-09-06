@@ -56,10 +56,11 @@ class GamePanel(
     override fun isOptimizedDrawingEnabled() = false
 
     private fun addTanks(playerCount: Int) {
-        for (i in 0 until playerCount) {
+        val spawnX = TankPalette.allSpawnX(playerCount).shuffled()
+        for (i in 0..<playerCount) {
             tankWidgets.add(
                 TankWidget(
-                    TankPalette.spawnX(i, playerCount),
+                    spawnX[i],
                     TankPalette.SPAWN_Y,
                     TankPalette.COLORS[i]
                 )
