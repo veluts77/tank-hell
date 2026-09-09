@@ -10,7 +10,8 @@ class ExplosionWidget(
     centerX: Int,
     centerY: Int,
     radius: Int,
-    speedFactor: Int
+    speedFactor: Int,
+    val sourcePlayerIndex: Int? = null
 ) {
     private val explosion = Explosion(centerX, centerY, radius, speedFactor)
 

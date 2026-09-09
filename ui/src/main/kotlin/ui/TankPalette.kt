@@ -13,11 +13,11 @@ object TankPalette {
         Color.gray,
         Color.magenta,
         Color.cyan,
-        Color.blue,
+        Color.green,
         Color.pink
     )
 
-    private val NAMES = listOf("Orange", "Gray", "Magenta", "Cyan", "Blue", "Pink")
+    private val NAMES = listOf("Orange", "Gray", "Magenta", "Cyan", "Green", "Pink")
 
     fun displayName(color: Color): String {
         val index = COLORS.indexOf(color)

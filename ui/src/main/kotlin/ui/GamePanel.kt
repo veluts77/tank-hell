@@ -1,9 +1,9 @@
 package ui
 
+import domain.Tournament
 import widgets.*
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Polygon
@@ -18,13 +18,13 @@ import javax.swing.SwingUtilities
 import kotlin.math.max
 
 class GamePanel(
-    playerCount: Int,
-    onNewGame: () -> Unit
+    private val tournament: Tournament,
+    onNextRound: () -> Unit,
+    onBackToSelect: () -> Unit
 ) : JPanel() {
 
     private var isHealthy = true
     private var matchOver = false
-    private var victoryText: String? = null
 
     private val w = 800
     private val h = 600
@@ -37,7 +37,7 @@ class GamePanel(
     private val explosionWidgets = mutableListOf<ExplosionWidget>()
     private val bulletWidgets = mutableListOf<BulletWidget>()
     private val gameFieldWidget = GameFieldWidget(w, h)
-    private val victoryOverlay = VictoryOverlay(onNewGame)
+    private val victoryOverlay = VictoryOverlay(onNextRound, onBackToSelect)
 
     val turnController = TurnController(tankWidgets) { bullet ->
         bulletWidgets.add(bullet)
@@ -49,7 +49,7 @@ class GamePanel(
         isFocusable = true
         add(victoryOverlay)
 
-        addTanks(playerCount)
+        addTanks(tournament.playerCount)
         installKeyBindings()
     }
 
@@ -62,7 +62,8 @@ class GamePanel(
                 TankWidget(
                     spawnX[i],
                     TankPalette.SPAWN_Y,
-                    TankPalette.COLORS[i]
+                    TankPalette.COLORS[i],
+                    i
                 )
             )
         }
@@ -162,9 +163,15 @@ class GamePanel(
         val angle = tankWidget?.aimAngleDegrees() ?: 0
         val power = tankWidget?.power() ?: 0
         val tankLabel = tankWidget?.let { "Tank #${turnController.activeIndex() + 1}" } ?: "—"
+        val roundText = "Round ${tournament.currentRound}/${tournament.roundCount}"
+        val scoreText = (0..<tournament.playerCount).joinToString("  ") { index ->
+            "${TankPalette.displayName(TankPalette.COLORS[index])} ${tournament.score(index)}"
+        }
 
         g2.color = Color.white
         g2.drawString("Active: $tankLabel", 10, 20)
+        g2.drawString(roundText, w - g2.fontMetrics.stringWidth(roundText) - 10, 20)
+        g2.drawString(scoreText, w - g2.fontMetrics.stringWidth(scoreText) - 10, 36)
         g2.drawString("Angle: $angle°", 10, 80)
         g2.drawString("Power: $power", 10, 96)
         g2.drawString(turnController.wind().displayText(), 10, 112)
@@ -172,15 +179,9 @@ class GamePanel(
     }
 
     private fun drawVictory(g2: Graphics2D) {
-        val text = victoryText ?: return
+        if (!matchOver) return
         g2.color = Color(0, 0, 0, 160)
         g2.fillRect(0, 0, w, h)
-        g2.color = Color.WHITE
-        g2.font = Font("SansSerif", Font.BOLD, 32)
-        val metrics = g2.fontMetrics
-        val x = (w - metrics.stringWidth(text)) / 2
-        val y = h / 2 - 10
-        g2.drawString(text, x, y)
     }
 
     private fun processLogic() {
@@ -197,10 +198,12 @@ class GamePanel(
         if (tankWidgets.size > 1) return
         if (bulletWidgets.isNotEmpty() || explosionWidgets.isNotEmpty() || blockWidgets.isNotEmpty()) return
         matchOver = true
-        victoryText = tankWidgets.singleOrNull()
+        val survivor = tankWidgets.singleOrNull()
+        tournament.finishRound(survivor?.playerIndex())
+        val headline = survivor
             ?.let { "${TankPalette.displayName(it.color())} tank wins!" }
             ?: "Draw!"
-        SwingUtilities.invokeLater { victoryOverlay.showResult() }
+        SwingUtilities.invokeLater { victoryOverlay.showResult(tournament, headline) }
     }
 
     private fun checkWorldSettled() {
@@ -241,7 +244,12 @@ class GamePanel(
             processTankFalling(it)
             if (it.isDestroyed()) {
                 toRemove.add(it)
-                val explosion = it.explode()
+                val killer = it.lastDamageSource()
+                if (killer != null) {
+                    tournament.creditKill(killer, it.playerIndex())
+                }
+                tournament.recordElimination(it.playerIndex())
+                val explosion = it.explode(killer)
                 explosionWidgets.add(explosion)
                 applyExplosionDamage(explosion)
             }
@@ -251,7 +259,10 @@ class GamePanel(
 
     private fun applyExplosionDamage(explosionWidget: ExplosionWidget) {
         tankWidgets.forEach { tankWidget ->
-            tankWidget.applyDamage(explosionWidget.damageFor(tankWidget.area()))
+            tankWidget.applyDamage(
+                explosionWidget.damageFor(tankWidget.area()),
+                explosionWidget.sourcePlayerIndex
+            )
         }
     }
 

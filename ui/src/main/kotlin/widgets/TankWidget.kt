@@ -13,11 +13,17 @@ import kotlin.math.sin
 class TankWidget(
     xPos: Int,
     yPos: Int,
-    private val color: Color
+    private val color: Color,
+    private val playerIndex: Int = 0
 ) {
     private val tank = Tank(xPos, yPos)
+    private var lastDamageSource: Int? = null
 
     fun color() = color
+
+    fun playerIndex() = playerIndex
+
+    fun lastDamageSource() = lastDamageSource
 
     fun tick() = tank.tick()
 
@@ -31,16 +37,20 @@ class TankWidget(
         paint(g2, a.x, a.y, color, tank.aimAngleDegrees())
     }
 
-    fun explode(): ExplosionWidget {
+    fun explode(sourcePlayerIndex: Int? = lastDamageSource): ExplosionWidget {
         val a = tank.area()
-        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10)
+        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10, sourcePlayerIndex)
     }
 
     fun area() = tank.area()
 
     fun health() = tank.health()
 
-    fun applyDamage(amount: Int) = tank.applyDamage(amount)
+    fun applyDamage(amount: Int, sourcePlayerIndex: Int?) {
+        if (amount <= 0) return
+        tank.applyDamage(amount)
+        if (sourcePlayerIndex != null) lastDamageSource = sourcePlayerIndex
+    }
 
     fun isDestroyed() = tank.isDestroyed()
 

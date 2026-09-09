@@ -1,5 +1,6 @@
 package ui
 
+import domain.Tournament
 import widgets.TankWidget
 import java.awt.Color
 import java.awt.Dimension
@@ -17,10 +18,11 @@ import javax.swing.JToggleButton
 import javax.swing.SwingConstants
 
 class PlayerSelectPanel(
-    private val onStart: (Int) -> Unit
+    private val onStart: (playerCount: Int, roundCount: Int) -> Unit
 ) : JPanel(GridBagLayout()) {
 
     private var selectedCount = DEFAULT_COUNT
+    private var selectedRounds = Tournament.DEFAULT_ROUNDS
 
     init {
         preferredSize = Dimension(800, 600)
@@ -35,34 +37,26 @@ class PlayerSelectPanel(
         title.foreground = Color.WHITE
         title.alignmentX = CENTER_ALIGNMENT
 
-        val subtitle = JLabel("Select players", SwingConstants.CENTER)
-        subtitle.font = Font("SansSerif", Font.PLAIN, 20)
-        subtitle.foreground = Color(200, 200, 210)
-        subtitle.alignmentX = CENTER_ALIGNMENT
-
+        val subtitle = sectionLabel("Select players")
         val preview = TankPreviewRow(DEFAULT_COUNT)
+        val countRow = toggleRow(MIN_COUNT, MAX_COUNT, DEFAULT_COUNT) { count ->
+            selectedCount = count
+            preview.setCount(count)
+        }
 
-        val countRow = JPanel()
-        countRow.isOpaque = false
-        countRow.alignmentX = CENTER_ALIGNMENT
-        val group = ButtonGroup()
-        for (count in MIN_COUNT..MAX_COUNT) {
-            val button = JToggleButton(count.toString())
-            button.font = Font("SansSerif", Font.BOLD, 18)
-            button.preferredSize = Dimension(56, 40)
-            button.isSelected = count == DEFAULT_COUNT
-            button.addActionListener {
-                selectedCount = count
-                preview.setCount(count)
-            }
-            group.add(button)
-            countRow.add(button)
+        val roundsSubtitle = sectionLabel("Select rounds")
+        val roundsRow = toggleRow(
+            Tournament.MIN_ROUNDS,
+            Tournament.MAX_ROUNDS,
+            Tournament.DEFAULT_ROUNDS
+        ) { rounds ->
+            selectedRounds = rounds
         }
 
         val start = JButton("Start")
         start.font = Font("SansSerif", Font.BOLD, 18)
         start.alignmentX = CENTER_ALIGNMENT
-        start.addActionListener { onStart(selectedCount) }
+        start.addActionListener { onStart(selectedCount, selectedRounds) }
 
         content.add(title)
         content.add(Box.createVerticalStrut(16))
@@ -71,10 +65,44 @@ class PlayerSelectPanel(
         content.add(preview)
         content.add(Box.createVerticalStrut(20))
         content.add(countRow)
+        content.add(Box.createVerticalStrut(20))
+        content.add(roundsSubtitle)
+        content.add(Box.createVerticalStrut(12))
+        content.add(roundsRow)
         content.add(Box.createVerticalStrut(28))
         content.add(start)
 
         add(content)
+    }
+
+    private fun sectionLabel(text: String): JLabel {
+        val label = JLabel(text, SwingConstants.CENTER)
+        label.font = Font("SansSerif", Font.PLAIN, 20)
+        label.foreground = Color(200, 200, 210)
+        label.alignmentX = CENTER_ALIGNMENT
+        return label
+    }
+
+    private fun toggleRow(
+        min: Int,
+        max: Int,
+        defaultValue: Int,
+        onSelect: (Int) -> Unit
+    ): JPanel {
+        val row = JPanel()
+        row.isOpaque = false
+        row.alignmentX = CENTER_ALIGNMENT
+        val group = ButtonGroup()
+        for (value in min..max) {
+            val button = JToggleButton(value.toString())
+            button.font = Font("SansSerif", Font.BOLD, 18)
+            button.preferredSize = Dimension(48, 36)
+            button.isSelected = value == defaultValue
+            button.addActionListener { onSelect(value) }
+            group.add(button)
+            row.add(button)
+        }
+        return row
     }
 
     companion object {
@@ -109,7 +137,7 @@ private class TankPreviewRow(
         val total = count * tankW + (count - 1) * GAP
         val startX = (width - total) / 2
         val y = (height - TankWidget.BODY_HEIGHT) / 2
-        for (i in 0 until count) {
+        for (i in 0..<count) {
             TankWidget.paint(g2, startX + i * (tankW + GAP), y, TankPalette.COLORS[i])
         }
     }

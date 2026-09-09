@@ -43,6 +43,6 @@ class BulletWidget(
 
     fun explode(): ExplosionWidget {
         val a = bullet.area()
-        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10)
+        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10, owner.playerIndex())
     }
 }

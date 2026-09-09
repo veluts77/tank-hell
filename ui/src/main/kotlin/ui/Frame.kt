@@ -1,5 +1,6 @@
 package ui
 
+import domain.Tournament
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import javax.swing.JFrame
@@ -14,13 +15,16 @@ class Frame : JFrame(), Runnable {
     @Volatile
     private var playing = false
     private var controlPanel: ControlPanel? = null
+    private var tournament: Tournament? = null
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
         setLocation(50, 50)
         title = "Tank Hell"
 
-        val select = PlayerSelectPanel { playerCount -> startGame(playerCount) }
+        val select = PlayerSelectPanel { playerCount, roundCount ->
+            startGame(playerCount, roundCount)
+        }
         root.add(select, CARD_SELECT)
         root.add(playRoot, CARD_PLAY)
         add(root)
@@ -29,10 +33,25 @@ class Frame : JFrame(), Runnable {
         isVisible = true
     }
 
-    private fun startGame(playerCount: Int) {
+    private fun startGame(playerCount: Int, roundCount: Int) {
+        tournament = Tournament(playerCount, roundCount)
+        showRound()
+    }
+
+    private fun startNextRound() {
+        tournament?.startNextRound()
+        showRound()
+    }
+
+    private fun showRound() {
+        val current = tournament ?: return
         playRoot.removeAll()
 
-        val gamePanel = GamePanel(playerCount) { backToSelect() }
+        val gamePanel = GamePanel(
+            tournament = current,
+            onNextRound = { startNextRound() },
+            onBackToSelect = { backToSelect() }
+        )
         val controls = ControlPanel(gamePanel.turnController)
         controlPanel = controls
 
@@ -49,6 +68,7 @@ class Frame : JFrame(), Runnable {
     private fun backToSelect() {
         playing = false
         controlPanel = null
+        tournament = null
         playRoot.removeAll()
         cards.show(root, CARD_SELECT)
         root.revalidate()
