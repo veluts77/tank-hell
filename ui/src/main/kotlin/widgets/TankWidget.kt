@@ -2,6 +2,8 @@ package widgets
 
 import domain.Area
 import domain.Tank
+import domain.WeaponSpec
+import java.awt.AlphaComposite
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
@@ -35,11 +37,19 @@ class TankWidget(
         val a = tank.area()
         drawHealthBar(g2, a)
         paint(g2, a.x, a.y, color, tank.aimAngleDegrees())
+        if (tank.isShielded()) drawShield(g2, a)
     }
 
     fun explode(sourcePlayerIndex: Int? = lastDamageSource): ExplosionWidget {
         val a = tank.area()
-        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10, sourcePlayerIndex)
+        return ExplosionWidget(
+            a.x + a.width / 2,
+            a.y + a.height / 2,
+            50,
+            10,
+            sourcePlayerIndex,
+            WeaponSpec.CENTER_DAMAGE,
+            WeaponSpec.EDGE_DAMAGE)
     }
 
     fun area() = tank.area()
@@ -48,9 +58,22 @@ class TankWidget(
 
     fun applyDamage(amount: Int, sourcePlayerIndex: Int?) {
         if (amount <= 0) return
-        tank.applyDamage(amount)
-        if (sourcePlayerIndex != null) lastDamageSource = sourcePlayerIndex
+        val mitigated = if (tank.isShielded()) {
+            (amount * Tank.SHIELD_DAMAGE_FACTOR).roundToInt()
+        } else {
+            amount
+        }
+        tank.applyDamage(mitigated)
+        if (mitigated > 0 && sourcePlayerIndex != null) lastDamageSource = sourcePlayerIndex
     }
+
+    fun heal(amount: Int) = tank.heal(amount)
+
+    fun activateShield() = tank.activateShield()
+
+    fun isShielded() = tank.isShielded()
+
+    fun onTurnEnded() = tank.onTurnEnded()
 
     fun isDestroyed() = tank.isDestroyed()
 
@@ -67,6 +90,25 @@ class TankWidget(
     fun adjustAimAngle(delta: Int) = tank.adjustAimAngle(delta)
 
     fun adjustPower(delta: Int) = tank.adjustPower(delta)
+
+    private fun drawShield(g2: Graphics2D, a: Area) {
+        val pad = 14
+        val oldComposite = g2.composite
+        val oldStroke = g2.stroke
+        val oldAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING)
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g2.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f)
+        g2.color = Color.CYAN
+        g2.fillOval(a.x - pad, a.y - pad, a.width + pad * 2, a.height + pad * 2)
+        g2.composite = oldComposite
+        g2.color = Color(80, 220, 255)
+        g2.stroke = BasicStroke(1f)
+        g2.drawOval(a.x - pad, a.y - pad, a.width + pad * 2, a.height + pad * 2)
+        g2.stroke = oldStroke
+        if (oldAntialiasing != null) {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasing)
+        }
+    }
 
     private fun drawHealthBar(g2: Graphics2D, a: Area) {
         val barY = a.y - HEALTH_BAR_HEIGHT - HEALTH_BAR_GAP

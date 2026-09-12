@@ -34,12 +34,15 @@ class Frame : JFrame(), Runnable {
     }
 
     private fun startGame(playerCount: Int, roundCount: Int) {
-        tournament = Tournament(playerCount, roundCount)
+        tournament = Tournament(playerCount, roundCount).also { it.grantRoundBonuses() }
         showRound()
     }
 
     private fun startNextRound() {
-        tournament?.startNextRound()
+        tournament?.let {
+            it.startNextRound()
+            it.grantRoundBonuses()
+        }
         showRound()
     }
 

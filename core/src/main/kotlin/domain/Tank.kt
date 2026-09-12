@@ -1,5 +1,7 @@
 package domain
 
+import kotlin.math.roundToInt
+
 class Tank(
     private var x: Int,
     private var y: Int,
@@ -9,6 +11,8 @@ class Tank(
     private var aimAngleDegrees = 45
     private var power = 10
     private var health = MAX_HEALTH
+    private var shieldTurnsLeft = 0
+    private var shieldJustActivated = false
 
     fun tick() {
         if (falling) y += 10
@@ -22,6 +26,27 @@ class Tank(
     fun applyDamage(amount: Int) {
         if (amount <= 0) return
         health = (health - amount).coerceAtLeast(0)
+    }
+
+    fun heal(amount: Int) {
+        if (amount <= 0) return
+        health = (health + amount).coerceAtMost(MAX_HEALTH)
+    }
+
+    fun activateShield() {
+        shieldTurnsLeft = SHIELD_TURNS
+        shieldJustActivated = true
+    }
+
+    fun isShielded() = shieldTurnsLeft > 0
+
+    fun onTurnEnded() {
+        if (shieldTurnsLeft <= 0) return
+        if (shieldJustActivated) {
+            shieldJustActivated = false
+            return
+        }
+        shieldTurnsLeft--
     }
 
     fun isDestroyed() = health <= 0
@@ -52,5 +77,9 @@ class Tank(
         const val MAX_ANGLE = 180
         const val MIN_POWER = 1
         const val MAX_POWER = 20
+        const val SHIELD_TURNS = 2
+        const val SHIELD_DAMAGE_FACTOR = 0.34
+        const val MEDKIT_HEAL = MAX_HEALTH / 2
+        val SELF_DESTRUCT_DAMAGE = (MAX_HEALTH * 66 / 100.0).roundToInt()
     }
 }

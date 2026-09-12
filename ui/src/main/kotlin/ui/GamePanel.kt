@@ -1,6 +1,8 @@
 package ui
 
+import domain.Tank
 import domain.Tournament
+import domain.WeaponType
 import widgets.*
 import java.awt.Color
 import java.awt.Dimension
@@ -39,9 +41,12 @@ class GamePanel(
     private val gameFieldWidget = GameFieldWidget(w, h)
     private val victoryOverlay = VictoryOverlay(onNextRound, onBackToSelect)
 
-    val turnController = TurnController(tankWidgets) { bullet ->
-        bulletWidgets.add(bullet)
-    }
+    val turnController = TurnController(
+        tankWidgets = tankWidgets,
+        arsenalFor = { tournament.arsenal(it) },
+        onProjectile = { bulletWidgets.add(it) },
+        onInstant = { type, owner -> applyInstantWeapon(type, owner) }
+    )
 
     init {
         layout = OverlayLayout(this)
@@ -102,6 +107,9 @@ class GamePanel(
         }
         bind("fire", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0)) {
             turnController.fire()
+        }
+        bind("cycleWeapon", KeyStroke.getKeyStroke(KeyEvent.VK_A, 0)) {
+            turnController.cycleWeapon()
         }
     }
 
@@ -176,12 +184,47 @@ class GamePanel(
         g2.drawString("Power: $power", 10, 96)
         g2.drawString(turnController.wind().displayText(), 10, 112)
         g2.drawString(turnController.statusText(), 10, 128)
+        drawWeaponHud(g2, 10, 144)
+    }
+
+    private fun drawWeaponHud(g2: Graphics2D, x: Int, y: Int) {
+        val arsenal = turnController.activeArsenal()
+        if (arsenal == null) {
+            g2.color = Color.white
+            g2.drawString("Weapon: —", x, y)
+            return
+        }
+        g2.color = Color.white
+        g2.drawString("Weapon: ${arsenal.selected.displayName}", x, y)
+
+        var cursorX = x
+        val countsY = y + 16
+        WeaponType.CYCLE_ORDER.forEach { type ->
+            val amount = if (type == WeaponType.STANDARD) "∞" else arsenal.count(type).toString()
+            val token = "${type.shortName} $amount"
+            g2.color = if (type == arsenal.selected) Color.yellow else Color.white
+            g2.drawString(token, cursorX, countsY)
+            cursorX += g2.fontMetrics.stringWidth(token) + 12
+        }
     }
 
     private fun drawVictory(g2: Graphics2D) {
         if (!matchOver) return
         g2.color = Color(0, 0, 0, 160)
         g2.fillRect(0, 0, w, h)
+    }
+
+    private fun applyInstantWeapon(type: WeaponType, owner: TankWidget) {
+        when (type) {
+            WeaponType.SHIELD -> owner.activateShield()
+            WeaponType.MEDKIT -> owner.heal(Tank.MEDKIT_HEAL)
+            WeaponType.NUKE -> {
+                tankWidgets.forEach { tankWidget ->
+                    tankWidget.applyDamage(Tank.SELF_DESTRUCT_DAMAGE, owner.playerIndex())
+                }
+            }
+            else -> {}
+        }
     }
 
     private fun processLogic() {

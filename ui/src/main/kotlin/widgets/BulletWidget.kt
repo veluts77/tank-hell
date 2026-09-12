@@ -2,6 +2,8 @@ package widgets
 
 import domain.Bullet
 import domain.GameField
+import domain.WeaponSpec
+import domain.WeaponType
 import domain.Wind
 import java.awt.Color
 import java.awt.Graphics2D
@@ -12,7 +14,8 @@ class BulletWidget(
     angle: Int,
     power: Int,
     wind: Wind,
-    private val owner: TankWidget
+    private val owner: TankWidget,
+    private val spec: WeaponSpec = WeaponSpec.STANDARD
 ) {
     private val bullet = Bullet(startX, startY, angle, power, wind)
     private var leftOwner = false
@@ -37,12 +40,26 @@ class BulletWidget(
     fun draw(g2: Graphics2D) {
         val a = bullet.area()
 
-        g2.color = Color.red
+        g2.color = bulletColor()
         g2.fillOval(a.x, a.y, a.width, a.height)
     }
 
     fun explode(): ExplosionWidget {
         val a = bullet.area()
-        return ExplosionWidget(a.x + a.width / 2, a.y + a.height / 2, 50, 10, owner.playerIndex())
+        return ExplosionWidget(
+            a.x + a.width / 2,
+            a.y + a.height / 2,
+            spec.explosionRadius,
+            10,
+            owner.playerIndex(),
+            spec.centerDamage,
+            spec.edgeDamage
+        )
+    }
+
+    private fun bulletColor() = when (spec.type) {
+        WeaponType.CLEANER -> Color.cyan
+        WeaponType.HEAVY -> Color.yellow
+        else -> Color.red
     }
 }

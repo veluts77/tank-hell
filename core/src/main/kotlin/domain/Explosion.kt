@@ -6,7 +6,9 @@ class Explosion(
     private val centerX: Int,
     private val centerY: Int,
     private val radius: Int,
-    speedFactor: Int
+    speedFactor: Int,
+    private val centerDamage: Int,
+    private val edgeDamage: Int
 ) {
     private var currentRadius = 0
     private val increment = radius / speedFactor
@@ -28,11 +30,6 @@ class Explosion(
     fun damageFor(area: Area): Int {
         val distance = area.distanceTo(centerX, centerY)
         if (distance > radius) return 0
-        return (CENTER_DAMAGE - (CENTER_DAMAGE - EDGE_DAMAGE) * (distance / radius)).roundToInt()
-    }
-
-    companion object {
-        const val CENTER_DAMAGE = 75
-        const val EDGE_DAMAGE = 10
+        return (centerDamage - (centerDamage - edgeDamage) * (distance / radius)).roundToInt()
     }
 }

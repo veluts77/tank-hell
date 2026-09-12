@@ -11,9 +11,11 @@ class ExplosionWidget(
     centerY: Int,
     radius: Int,
     speedFactor: Int,
-    val sourcePlayerIndex: Int? = null
+    val sourcePlayerIndex: Int? = null,
+    centerDamage: Int,
+    edgeDamage: Int
 ) {
-    private val explosion = Explosion(centerX, centerY, radius, speedFactor)
+    private val explosion = Explosion(centerX, centerY, radius, speedFactor, centerDamage, edgeDamage)
 
     fun tick() = explosion.tick()
 

@@ -1,11 +1,17 @@
 package domain
 
+import kotlin.random.Random
+
 class Tournament(
     val playerCount: Int,
-    val roundCount: Int
+    val roundCount: Int,
+    private val random: Random = Random.Default
 ) {
     private val scores = IntArray(playerCount)
     private val eliminationOrder = mutableListOf<Int>()
+    private val arsenals = List(playerCount) {
+        PlayerArsenal(cleanerCount = roundCount, selfDestructCount = 1)
+    }
 
     var currentRound = 1
         private set
@@ -14,6 +20,14 @@ class Tournament(
         private set
 
     fun score(playerIndex: Int) = scores[playerIndex]
+
+    fun arsenal(playerIndex: Int) = arsenals[playerIndex]
+
+    fun grantRoundBonuses() {
+        arsenals.forEach { arsenal ->
+            arsenal.add(WeaponType.BONUS_TYPES.random(random))
+        }
+    }
 
     fun creditKill(killerIndex: Int, victimIndex: Int) {
         if (killerIndex == victimIndex) return
@@ -33,6 +47,9 @@ class Tournament(
         }
         if (playerCount >= 4) {
             fromLast.getOrNull(1)?.let { scores[it] += THIRD }
+        }
+        eliminationOrder.firstOrNull()?.let { lastPlace ->
+            arsenals[lastPlace].add(WeaponType.NUKE)
         }
         roundFinished = true
     }
