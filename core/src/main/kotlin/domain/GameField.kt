@@ -22,8 +22,39 @@ class GameField(
         }
     }
 
+    private val clouds = mutableListOf<Cloud>()
+
     init {
         buildLandscape()
+        initClouds((3..8).random())
+    }
+
+    fun clouds(): List<Cloud> = clouds
+
+    private fun initClouds(count: Int) {
+        clouds.clear()
+        repeat(count) {
+            clouds.add(Cloud.random(width))
+        }
+    }
+
+    fun tickClouds(windStrength: Int) {
+        val toReplace = mutableListOf<Int>()
+        clouds.forEachIndexed { index, cloud ->
+            cloud.tick(windStrength)
+            if (windStrength > 0 && cloud.isOffScreenRight(width)) {
+                toReplace.add(index)
+            } else if (windStrength < 0 && cloud.isOffScreenLeft()) {
+                toReplace.add(index)
+            }
+        }
+        for (index in toReplace) {
+            clouds[index] = if (windStrength > 0) {
+                Cloud.spawnFromLeft(width)
+            } else {
+                Cloud.spawnFromRight(width)
+            }
+        }
     }
 
     /**

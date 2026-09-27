@@ -232,6 +232,7 @@ class GamePanel(
         processExplosions()
         processTanks()
         processBullets()
+        processClouds()
         checkWorldSettled()
         checkMatchOver()
     }
@@ -336,6 +337,10 @@ class GamePanel(
             }
         }
         bulletWidgets.removeAll(toRemove)
+    }
+
+    private fun processClouds() {
+        gameFieldWidget.gameField().tickClouds(turnController.wind().signedStrength())
     }
 
     private fun emptyMatrix(width: Int, height: Int) = Array(width) {

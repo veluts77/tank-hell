@@ -14,6 +14,7 @@ class GameFieldWidget(
     fun draw(g2: Graphics2D) {
         g2.color = backgroundColor
         g2.fillRect(0, 0, width, height)
+        gameField.clouds().forEach { CloudWidget.draw(it, g2) }
         g2.color = Color.blue
         for (x in 0..<width) {
             for (y in 0..<height) {
